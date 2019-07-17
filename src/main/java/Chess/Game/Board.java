@@ -1,13 +1,16 @@
 package Chess.Game;
 
+import Chess.Exceptions.NoSuchFigureException;
+import Chess.Exceptions.WrongMoveException;
 import Chess.Game.pieces.*;
-import Chess.generated.BoardData;
-import Chess.generated.COLOR;
-import Chess.generated.ChessFigure;
-import Chess.generated.PositionData;
+import Chess.generated.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Board {
 
@@ -22,6 +25,13 @@ public class Board {
 
         initScenario();
 
+    }
+
+    private Board(Board board){
+        this.chessmanList = new ArrayList<>(board.getChessmanList());
+
+        this.width = board.getWidth();
+        this.height = board.getHeight();
     }
 
     private void initScenario(){
@@ -95,6 +105,33 @@ public class Board {
 
     public List<Chessman> getChessmanList() {
         return chessmanList;
+    }
+
+    public Board makeMove(MoveMessage message) throws NoSuchFigureException, WrongMoveException{
+        Board b = new Board(this);
+
+        PositionData chessFigure = message.getFigure().getPos();
+        PositionData destinationPos = message.getDestinationPos();
+
+        List<Chessman> collection = b.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == chessFigure.getX() && chessman.getPos().getY() == chessFigure.getY()).collect(Collectors.toList());
+
+        if(collection.isEmpty()){
+            throw new NoSuchFigureException();
+        }
+
+        Chessman currentFigure = collection.get(0);
+
+        switch (message.getMoveType()){
+            case NORMAL:
+                currentFigure.performNormalMove(destinationPos, b);
+                break;
+            case CASTELING:
+                break;
+            case EN_PASSANT:
+                break;
+        }
+
+        return b;
     }
 
     public int getWidth() {

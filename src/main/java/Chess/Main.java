@@ -2,7 +2,12 @@ package Chess;
 
 import Chess.Game.Board;
 import Chess.Game.pieces.Chessman;
+import Chess.Game.pieces.Pawn;
 import Chess.Server.Server;
+import Chess.generated.ChessFigure;
+import Chess.generated.MoveMessage;
+import Chess.generated.MoveType;
+import Chess.generated.PositionData;
 import Chess.misc.Logger;
 import Chess.misc.Settings;
 import org.apache.commons.cli.*;
@@ -42,5 +47,15 @@ public class Main {
         for (Chessman chessman : b.getChessmanList()) {
             Logger.debug(chessman.getPos(), chessman.getMovablePositions(b).toString());
         }
+
+        ChessFigure abc = b.getChessmanList().get(0).getFigure();
+
+        b.makeMove(new MoveMessage(){{
+            this.setDestinationPos(new PositionData(){{this.setX(1); this.setY(2);}});
+            this.setFigure(abc);
+            this.setMoveType(MoveType.NORMAL);
+        }});
+
+        b.printBoardToConsole();
     }
 }
