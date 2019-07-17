@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:complexType name="positionData">
+        <xs:sequence>
+            <xs:element name="X" type="xs:int"/>
+            <xs:element name="Y" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="MoveType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="NORMAL"/>
+            <xs:enumeration value="CASTELING"/>
+            <xs:enumeration value="EN_PASSANT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="chessFigureType" final="restriction">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PAWN"/>
+            <xs:enumeration value="KING"/>
+            <xs:enumeration value="QUEEN"/>
+            <xs:enumeration value="ROOK"/>
+            <xs:enumeration value="BISHOP"/>
+            <xs:enumeration value="KNIGHT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Errortype">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="NOERROR" />
+            <xs:enumeration value="ERROR" />
+            <xs:enumeration value="AWAIT_LOGIN" />
+            <xs:enumeration value="AWAIT_MOVE" />
+            <xs:enumeration value="ILLEGAL_MOVE" />
+            <xs:enumeration value="TIMEOUT" />
+            <xs:enumeration value="TOO_MANY_TRIES" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="MessageType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AwaitMove"/>
+            <xs:enumeration value="Move"/>
+            <xs:enumeration value="Login"/>
+            <xs:enumeration value="LoginReply"/>
+            <xs:enumeration value="Accept"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="COLOR">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="BLACK"/>
+            <xs:enumeration value="WHITE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="chessFigure">
+        <xs:sequence>
+            <xs:element name="pos" type="positionData"/>
+        </xs:sequence>
+        <xs:attribute name="moved" type="xs:boolean"/>
+        <xs:attribute name="type" type="chessFigureType"/>
+        <xs:attribute name="color" type="COLOR"/>
+    </xs:complexType>
+    
+    <xs:complexType name="BoardData">
+        <xs:sequence>
+            <xs:element name="figure" type="chessFigure" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="width" type="xs:int"/>
+        <xs:attribute name="height" type="xs:int"/>
+    </xs:complexType>
+
+    <xs:element name="ChessMessage">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element name="AwaitMove" type="AwaitMoveMessage"/>
+                <xs:element name="Move" type="MoveMessage"/>
+                <xs:element name="Login" type="LoginMessage"/>
+                <xs:element name="LoginReply" type="LoginReplyMessage"/>
+                <xs:element name="Win" type="WinMessage"/>
+                <xs:element name="Disconnect" type="DisconnectMessage"/>
+            </xs:choice>
+            <xs:attribute name="messageType" type="MessageType"/>
+            <xs:attribute name="id" type="xs:int"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="AwaitMoveMessage">
+        <xs:sequence>
+            <xs:element name="board" type="BoardData"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="MoveMessage">
+        <xs:sequence>
+            <xs:element name="figure" type="chessFigure"/>
+            <xs:element name="destinationPos" type="positionData"/>
+            <xs:element name="moveType" type="MoveType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="LoginMessage">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="LoginReplyMessage">
+        <xs:sequence>
+            <xs:element name="newID" type="xs:int" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AcceptMessage">
+        <xs:sequence>
+                <xs:element name="accept" type="xs:boolean" />
+                <xs:element name="errortypeCode" type="Errortype" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="WinMessage">
+        <xs:sequence>
+            <xs:element name="board" type="BoardData" />
+            <xs:element name="winner" type="COLOR"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DisconnectMessage">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+            <xs:element name="errortypeCode" type="Errortype" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
