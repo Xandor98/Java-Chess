@@ -101,6 +101,14 @@ public class Board {
         return chessmanList;
     }
 
+    /**
+     *
+     * @param message The {@link MoveMessage} that represent the current move to make
+     * @return If it is possible to propose a wish
+     * @throws NoSuchFigureException When the given Figure is not on the Board
+     * @throws WrongMoveException When you cant move to the destination Port
+     * @throws IndexOutOfBoundsException When the Figure or Destination out of the Field
+     */
     public boolean makeMove(MoveMessage message) throws NoSuchFigureException, WrongMoveException, IndexOutOfBoundsException{
         PositionData chessFigure = message.getFigure().getPos();
         PositionData destinationPos = message.getDestinationPos();
@@ -111,6 +119,14 @@ public class Board {
 
         if(chessFigure.getX() >= this.width || chessFigure.getY() >= this.height){
             throw new IndexOutOfBoundsException("Chess Figure Position is Greater than given Width and Height");
+        }
+
+        if(destinationPos.getX() < 0 || destinationPos.getY() < 0){
+            throw new IndexOutOfBoundsException("Destination Position is Below 0");
+        }
+
+        if(destinationPos.getX() >= this.width || destinationPos.getY() >= this.height){
+            throw new IndexOutOfBoundsException("Destination Position is Greater than given Width and Height");
         }
 
         List<Chessman> collection = this.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == chessFigure.getX() && chessman.getPos().getY() == chessFigure.getY()).collect(Collectors.toList());
@@ -144,11 +160,18 @@ public class Board {
         chessmanList.add(Chessman.readFigure(nFig));
     }
 
-    public Chessman getFigureByPosition(PositionData data) throws NoSuchFigureException{
+    public boolean inChess(COLOR color){
+        Chessman king = chessmanList.stream().filter(chessman -> chessman.getColor() == color && chessman.getType().equals(ChessFigureType.KING)).collect(Collectors.toList()).get(0);
+
+        return chessmanList.stream().filter(chessman -> chessman.getColor() == (color.equals(COLOR.WHITE) ? COLOR.BLACK : COLOR.WHITE))
+                .anyMatch(chessman -> chessman.getMovablePositions(this).stream().map(Position::new).anyMatch(position -> position.equals(new Position(king.getPos()))));
+    }
+
+    public Chessman getFigureByPosition(PositionData data){
         List<Chessman> collection = this.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == data.getX() && chessman.getPos().getY() == data.getY()).collect(Collectors.toList());
 
         if(collection.isEmpty()){
-            throw new NoSuchFigureException();
+            return null;
         }
 
         return collection.get(0);
