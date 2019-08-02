@@ -1,12 +1,12 @@
 package Chess.Game.pieces;
 
 import Chess.Game.Board;
-import Chess.generated.COLOR;
-import Chess.generated.ChessFigure;
-import Chess.generated.ChessFigureType;
-import Chess.generated.PositionData;
+import Chess.Game.Position;
+import Chess.generated.*;
 import Chess.Exceptions.WrongMoveException;
+import Chess.misc.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Chessman {
@@ -16,6 +16,8 @@ public abstract class Chessman {
     private ChessFigureType type;
 
     private boolean moved;
+    protected boolean enPassantPossible = false;
+    private int moves = 0;
 
     protected Chessman(ChessFigure figure){
         this(figure.getColor(), figure.getPos(), figure.getType(), figure.isMoved());
@@ -30,12 +32,29 @@ public abstract class Chessman {
 
     public abstract List<PositionData> getMovablePositions(Board board);
 
-    public void performNormalMove(PositionData data, Board board) throws WrongMoveException{
-        System.out.println(data);
-        System.out.println(getMovablePositions(board));
-        if(getMovablePositions(board).contains(data)){
+    public void performMove(PositionData data, Board board) throws WrongMoveException{
+        if(getMovablePositions(board).stream().map(Position::new).anyMatch(position -> position.equals(new Position(data)))){
+            Logger.info("Chessfigure moved from", new Position(this.pos), "to", new Position(data));
+            for (Chessman chessman : new ArrayList<>(board.getChessmanList())) {
+                if(new Position(chessman.getPos()).equals(new Position(data)) && chessman.getColor() != this.getColor()){
+                    board.getChessmanList().remove(chessman);
+                    Logger.info("Figure", this.color, this.type, "has kicked out", chessman.color, chessman.type);
+                    break;
+                }
+            }
+            if(this.type.equals(ChessFigureType.PAWN)){
+                if(!this.moved && Math.abs(data.getY() - this.pos.getY()) == 2){
+                    this.enPassantPossible = true;
+                }else{
+                    this.enPassantPossible = false;
+                }
+            }
             this.pos = data;
             moved = true;
+            moves++;
+            if(moves > 1){
+                enPassantPossible = false;
+            }
         }else{
             throw new WrongMoveException();
         }

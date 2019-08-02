@@ -6,8 +6,10 @@ public class Logger {
 
     private static final LogLvl DEFAULT = LogLvl.DEBUG;
 
+    public static boolean testcase = false;
+
     public static void log(LogLvl lvl, Object... msg){
-        if(lvl.getLevel() >= DEFAULT.getLevel()){
+        if(lvl.getLevel() >= DEFAULT.getLevel() && !testcase){
             for (Object o : msg) {
                 System.out.print(o.toString() + " ");
             }

@@ -8,14 +8,6 @@
         </xs:sequence>
     </xs:complexType>
 
-    <xs:simpleType name="MoveType">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="NORMAL"/>
-            <xs:enumeration value="CASTELING"/>
-            <xs:enumeration value="EN_PASSANT"/>
-        </xs:restriction>
-    </xs:simpleType>
-
     <xs:simpleType name="chessFigureType" final="restriction">
         <xs:restriction base="xs:string">
             <xs:enumeration value="PAWN"/>
@@ -80,6 +72,8 @@
                 <xs:element name="Move" type="MoveMessage"/>
                 <xs:element name="Login" type="LoginMessage"/>
                 <xs:element name="LoginReply" type="LoginReplyMessage"/>
+                <xs:element name="MakeWish" type="MakeAWishMessage"/>
+                <xs:element name="Wish" type="WishMessage"/>
                 <xs:element name="Win" type="WinMessage"/>
                 <xs:element name="Disconnect" type="DisconnectMessage"/>
             </xs:choice>
@@ -94,11 +88,22 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="MakeAWishMessage">
+        <xs:sequence>
+            <xs:element name="board" type="BoardData"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="WishMessage">
+        <xs:sequence>
+            <xs:element name="newFigure" type="chessFigureType"/>
+        </xs:sequence>
+    </xs:complexType>
+
     <xs:complexType name="MoveMessage">
         <xs:sequence>
             <xs:element name="figure" type="chessFigure"/>
             <xs:element name="destinationPos" type="positionData"/>
-            <xs:element name="moveType" type="MoveType"/>
         </xs:sequence>
     </xs:complexType>
 

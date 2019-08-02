@@ -6,11 +6,8 @@ import Chess.Game.pieces.*;
 import Chess.generated.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Board {
 
@@ -23,7 +20,7 @@ public class Board {
         this.width = 8;
         this.height = 8;
 
-        initScenario();
+        initDefault();
 
     }
 
@@ -34,12 +31,9 @@ public class Board {
         this.height = board.getHeight();
     }
 
-    private void initScenario(){
-        this.chessmanList.add(new Pawn(COLOR.BLACK, new PositionData(){{this.setX(1);this.setY(1);}}, false));
-        this.chessmanList.add(new Pawn(COLOR.BLACK, new PositionData(){{this.setX(3);this.setY(1);}}, false));
-
-        this.chessmanList.add(new Pawn(COLOR.WHITE, new PositionData(){{this.setX(1);this.setY(3);}}, true));
-        this.chessmanList.add(new Pawn(COLOR.WHITE, new PositionData(){{this.setX(3);this.setY(4);}}, true));
+    public void changeBoard(List<Chessman> figures){
+        this.chessmanList.clear();
+        this.chessmanList.addAll(figures);
     }
 
     private void initDefault(){
@@ -63,12 +57,12 @@ public class Board {
         this.chessmanList.add(new Pawn(COLOR.WHITE, new PositionData(){{this.setX(7); this.setY(6);}}, false));
 
         //KING
-        this.chessmanList.add(new King(COLOR.BLACK, new PositionData(){{this.setX(3); this.setY(0);}}, false));
-        this.chessmanList.add(new King(COLOR.WHITE, new PositionData(){{this.setX(3); this.setY(7);}}, false));
+        this.chessmanList.add(new King(COLOR.BLACK, new PositionData(){{this.setX(4); this.setY(0);}}, false));
+        this.chessmanList.add(new King(COLOR.WHITE, new PositionData(){{this.setX(4); this.setY(7);}}, false));
 
         //QUEEN
-        this.chessmanList.add(new Queen(COLOR.BLACK, new PositionData(){{this.setX(4); this.setY(0);}}, false));
-        this.chessmanList.add(new Queen(COLOR.WHITE, new PositionData(){{this.setX(4); this.setY(7);}}, false));
+        this.chessmanList.add(new Queen(COLOR.BLACK, new PositionData(){{this.setX(3); this.setY(0);}}, false));
+        this.chessmanList.add(new Queen(COLOR.WHITE, new PositionData(){{this.setX(3); this.setY(7);}}, false));
 
         //ROOKs
         this.chessmanList.add(new Rook(COLOR.BLACK, new PositionData(){{this.setX(0); this.setY(0);}}, false));
@@ -107,13 +101,19 @@ public class Board {
         return chessmanList;
     }
 
-    public Board makeMove(MoveMessage message) throws NoSuchFigureException, WrongMoveException{
-        Board b = new Board(this);
-
+    public boolean makeMove(MoveMessage message) throws NoSuchFigureException, WrongMoveException, IndexOutOfBoundsException{
         PositionData chessFigure = message.getFigure().getPos();
         PositionData destinationPos = message.getDestinationPos();
 
-        List<Chessman> collection = b.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == chessFigure.getX() && chessman.getPos().getY() == chessFigure.getY()).collect(Collectors.toList());
+        if(chessFigure.getX() < 0 || chessFigure.getY() < 0){
+            throw new IndexOutOfBoundsException("Chess Figure Position is Below 0");
+        }
+
+        if(chessFigure.getX() >= this.width || chessFigure.getY() >= this.height){
+            throw new IndexOutOfBoundsException("Chess Figure Position is Greater than given Width and Height");
+        }
+
+        List<Chessman> collection = this.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == chessFigure.getX() && chessman.getPos().getY() == chessFigure.getY()).collect(Collectors.toList());
 
         if(collection.isEmpty()){
             throw new NoSuchFigureException();
@@ -121,17 +121,44 @@ public class Board {
 
         Chessman currentFigure = collection.get(0);
 
-        switch (message.getMoveType()){
-            case NORMAL:
-                currentFigure.performNormalMove(destinationPos, b);
-                break;
-            case CASTELING:
-                break;
-            case EN_PASSANT:
-                break;
+        currentFigure.performMove(destinationPos, this);
+
+        return chessmanList.stream().anyMatch(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1));
+    }
+
+    public void proposeAWish(WishMessage wishMessage){
+        if(chessmanList.stream().noneMatch(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1))){
+            throw new NoSuchFigureException();
         }
 
-        return b;
+        Chessman man = chessmanList.stream().filter(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1)).collect(Collectors.toList()).get(0);
+
+        chessmanList.remove(man);
+        ChessFigure nFig = new ChessFigure(){{
+            this.setMoved(true);
+            this.setType(wishMessage.getNewFigure());
+            this.setColor(man.getColor());
+            this.setPos(man.getPos());
+        }};
+
+        chessmanList.add(Chessman.readFigure(nFig));
+    }
+
+    public Chessman getFigureByPosition(PositionData data) throws NoSuchFigureException{
+        List<Chessman> collection = this.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == data.getX() && chessman.getPos().getY() == data.getY()).collect(Collectors.toList());
+
+        if(collection.isEmpty()){
+            throw new NoSuchFigureException();
+        }
+
+        return collection.get(0);
+    }
+
+    public Chessman getFigureByPosition(int X, int Y){
+        return getFigureByPosition(new PositionData(){{
+            this.setX(X);
+            this.setY(Y);
+        }});
     }
 
     public int getWidth() {
