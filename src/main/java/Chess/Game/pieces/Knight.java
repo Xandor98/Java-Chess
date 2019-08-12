@@ -34,10 +34,9 @@ public class Knight extends Chessman {
         positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() - 2).getData());
 
         for(PositionData pos : new ArrayList<>(positionData)){
-            if(board.getFigureByPosition(pos) != null){
+            if(board.getFigureByPosition(pos) != null && board.getFigureByPosition(pos).getColor().equals(this.getColor())){
                 positionData.remove(pos);
-            }
-            if(pos.getX() < 0 || pos.getY() < 0 ||pos.getX() >= board.getWidth() || pos.getY() >= board.getHeight()){
+            }else if(pos.getX() < 0 || pos.getY() < 0 ||pos.getX() >= board.getWidth() || pos.getY() >= board.getHeight()){
                 positionData.remove(pos);
             }
         }

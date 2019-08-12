@@ -4,7 +4,9 @@ import Chess.Exceptions.NoSuchFigureException;
 import Chess.Exceptions.WrongMoveException;
 import Chess.Game.pieces.*;
 import Chess.generated.*;
+import Chess.misc.Logger;
 
+import java.rmi.NoSuchObjectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,13 +24,6 @@ public class Board {
 
         initDefault();
 
-    }
-
-    private Board(Board board){
-        this.chessmanList = new ArrayList<>(board.getChessmanList());
-
-        this.width = board.getWidth();
-        this.height = board.getHeight();
     }
 
     public void changeBoard(List<Chessman> figures){
@@ -129,13 +124,7 @@ public class Board {
             throw new IndexOutOfBoundsException("Destination Position is Greater than given Width and Height");
         }
 
-        List<Chessman> collection = this.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == chessFigure.getX() && chessman.getPos().getY() == chessFigure.getY()).collect(Collectors.toList());
-
-        if(collection.isEmpty()){
-            throw new NoSuchFigureException();
-        }
-
-        Chessman currentFigure = collection.get(0);
+        Chessman currentFigure = this.getFigureByPosition(chessFigure);
 
         currentFigure.performMove(destinationPos, this);
 
@@ -167,7 +156,7 @@ public class Board {
                 .anyMatch(chessman -> chessman.getMovablePositions(this).stream().map(Position::new).anyMatch(position -> position.equals(new Position(king.getPos()))));
     }
 
-    public Chessman getFigureByPosition(PositionData data){
+    public Chessman getFigureByPosition(PositionData data) {
         List<Chessman> collection = this.getChessmanList().stream().filter(chessman -> chessman.getPos().getX() == data.getX() && chessman.getPos().getY() == data.getY()).collect(Collectors.toList());
 
         if(collection.isEmpty()){
@@ -177,7 +166,7 @@ public class Board {
         return collection.get(0);
     }
 
-    public Chessman getFigureByPosition(int X, int Y){
+    public Chessman getFigureByPosition(int X, int Y) {
         return getFigureByPosition(new PositionData(){{
             this.setX(X);
             this.setY(Y);

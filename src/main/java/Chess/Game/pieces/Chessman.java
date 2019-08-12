@@ -34,11 +34,11 @@ public abstract class Chessman {
 
     public void performMove(PositionData data, Board board) throws WrongMoveException{
         if(getMovablePositions(board).stream().map(Position::new).anyMatch(position -> position.equals(new Position(data)))){
-            Logger.info("Chessfigure moved from", new Position(this.pos), "to", new Position(data));
+            Logger.info(this.getColor(), this.getType(), "moved from", new Position(this.pos), "to", new Position(data));
             for (Chessman chessman : new ArrayList<>(board.getChessmanList())) {
                 if(new Position(chessman.getPos()).equals(new Position(data)) && chessman.getColor() != this.getColor()){
                     board.getChessmanList().remove(chessman);
-                    Logger.info("Figure", this.color, this.type, "has kicked out", chessman.color, chessman.type);
+                    Logger.info(this.getColor(), this.getType(), this.color, this.type, "has kicked out", chessman.color, chessman.type);
                     break;
                 }
             }
@@ -49,6 +49,20 @@ public abstract class Chessman {
                     this.enPassantPossible = false;
                 }
             }
+
+            if(this.type.equals(ChessFigureType.KING)){
+                if(Math.abs(this.pos.getX() - data.getX()) == 2){
+                    switch (this.color){
+                        case BLACK:
+                            //TODO: Move Tower to Position
+                            break;
+                        case WHITE:
+                            //TODO: Move tower to Position
+                            break;
+                    }
+                }
+            }
+
             this.pos = data;
             moved = true;
             moves++;
@@ -102,5 +116,14 @@ public abstract class Chessman {
         figure.setMoved(this.moved);
         figure.setColor(this.color);
         return figure;
+    }
+
+    @Override
+    public String toString() {
+        return "Chessman{" +
+                "color=" + color +
+                ", pos=" + new Position(pos) +
+                ", type=" + type +
+                '}';
     }
 }
