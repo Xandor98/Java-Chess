@@ -8,6 +8,7 @@ import Chess.misc.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Chessman {
 
@@ -16,7 +17,7 @@ public abstract class Chessman {
     private ChessFigureType type;
 
     private boolean moved;
-    protected boolean enPassantPossible = false;
+    boolean enPassantPossible = false;
     private int moves = 0;
 
     protected Chessman(ChessFigure figure){
@@ -32,45 +33,96 @@ public abstract class Chessman {
 
     public abstract List<PositionData> getMovablePositions(Board board);
 
-    public void performMove(PositionData data, Board board) throws WrongMoveException{
-        if(getMovablePositions(board).stream().map(Position::new).anyMatch(position -> position.equals(new Position(data)))){
-            Logger.info(this.getColor(), this.getType(), "moved from", new Position(this.pos), "to", new Position(data));
-            for (Chessman chessman : new ArrayList<>(board.getChessmanList())) {
-                if(new Position(chessman.getPos()).equals(new Position(data)) && chessman.getColor() != this.getColor()){
-                    board.getChessmanList().remove(chessman);
-                    Logger.info(this.getColor(), this.getType(), this.color, this.type, "has kicked out", chessman.color, chessman.type);
-                    break;
-                }
-            }
-            if(this.type.equals(ChessFigureType.PAWN)){
-                if(!this.moved && Math.abs(data.getY() - this.pos.getY()) == 2){
-                    this.enPassantPossible = true;
-                }else{
-                    this.enPassantPossible = false;
-                }
-            }
+    public List<PositionData> getMovableChessPositions(Board board, List<Chessman> chessmen){
+        List<Position> positionData = getMovablePositions(board).stream().map(Position::new).collect(Collectors.toList());
 
-            if(this.type.equals(ChessFigureType.KING)){
-                if(Math.abs(this.pos.getX() - data.getX()) == 2){
-                    switch (this.color){
-                        case BLACK:
-                            //TODO: Move Tower to Position
-                            break;
-                        case WHITE:
-                            //TODO: Move tower to Position
-                            break;
+        List<Position> allChessPositions = new ArrayList<>();
+        chessmen.forEach(chessman -> allChessPositions.addAll(chessman.getMovablePositions(board).stream().map(Position::new)
+                .filter(position -> board.getFigureByPosition(position.getData()) == null).collect(Collectors.toList())));
+
+        List<PositionData> ret = new ArrayList<>();
+        if(!this.type.equals(ChessFigureType.KING)) {
+            for (Position pos : positionData) {
+                if (allChessPositions.contains(pos)) {
+                    Board b = board.performFakeMove(new MoveMessage() {{
+                        this.setFigure(Chessman.this.getFigure());
+                        this.setDestinationPos(pos.getData());
+                    }}).getLeft();
+
+                    if (b.inChess(this.color).size() == 0) {
+                        ret.add(pos.getData());
                     }
                 }
             }
+        }else{
+            for (Position pos : positionData) {
+                Board b = board.performFakeMove(new MoveMessage() {{
+                    this.setFigure(Chessman.this.getFigure());
+                    this.setDestinationPos(pos.getData());
+                }}).getLeft();
 
-            this.pos = data;
-            moved = true;
-            moves++;
-            if(moves > 1){
-                enPassantPossible = false;
+                if (b.inChess(this.color).size() == 0) {
+                    ret.add(pos.getData());
+                }
             }
+        }
+
+        return ret;
+    }
+
+    public void performMove(PositionData data, Board board) throws WrongMoveException{
+        List<Chessman> chessmanList = board.inChess(this.color);
+
+        if(chessmanList.size() > 0){
+            if(getMovableChessPositions(board, chessmanList).stream().map(Position::new).anyMatch(position -> position.equals(new Position(data)))){
+                Logger.info(this.getColor(), this.getType(), "prevented Chess");
+                Logger.info(this.getColor(), this.getType(), "moved from", new Position(this.pos), "to", new Position(data));
+            }else {
+                throw new WrongMoveException();
+            }
+        }else if(getMovablePositions(board).stream().map(Position::new).anyMatch(position -> position.equals(new Position(data)))){
+            Logger.info(this.getColor(), this.getType(), "moved from", new Position(this.pos), "to", new Position(data));
         }else{
             throw new WrongMoveException();
+        }
+
+        for (Chessman chessman : new ArrayList<>(board.getChessmanList())) {
+            if(new Position(chessman.getPos()).equals(new Position(data)) && chessman.getColor() != this.getColor()){
+                board.getChessmanList().remove(chessman);
+                Logger.info(this.getColor(), this.getType(), this.color, this.type, "has kicked out", chessman.color, chessman.type);
+                break;
+            }
+        }
+        if(this.type.equals(ChessFigureType.PAWN)){
+            this.enPassantPossible = !this.moved && Math.abs(data.getY() - this.pos.getY()) == 2;
+        }
+
+        if(this.type.equals(ChessFigureType.KING)){
+            if(Math.abs(this.pos.getX() - data.getX()) == 2){
+                switch (this.color){
+                    case BLACK:
+                        if(data.getX() < this.pos.getX()){
+                            board.getFigureByPosition(0,0).pos = new Position(data.getX() + 1, 0).getData();
+                        }else {
+                            board.getFigureByPosition(7,0).pos = new Position(data.getX() - 1, 0).getData();
+                        }
+                        break;
+                    case WHITE:
+                        if(data.getX() < this.pos.getX()){
+                            board.getFigureByPosition(0,7).pos = new Position(data.getX() + 1, 7).getData();
+                        }else {
+                            board.getFigureByPosition(7,7).pos = new Position(data.getX() - 1, 7).getData();
+                        }
+                        break;
+                }
+            }
+        }
+
+        this.pos = data;
+        moved = true;
+        moves++;
+        if(moves > 1){
+            enPassantPossible = false;
         }
     }
 
@@ -105,7 +157,7 @@ public abstract class Chessman {
         return type;
     }
 
-    public boolean isMoved() {
+    boolean isMoved() {
         return moved;
     }
 

@@ -24,20 +24,12 @@
             <xs:enumeration value="NOERROR" />
             <xs:enumeration value="ERROR" />
             <xs:enumeration value="AWAIT_LOGIN" />
+            <xs:enumeration value="WRONG_LOBBY_PASS"/>
+            <xs:enumeration value="NO_GAME_FOUND"/>
             <xs:enumeration value="AWAIT_MOVE" />
             <xs:enumeration value="ILLEGAL_MOVE" />
             <xs:enumeration value="TIMEOUT" />
             <xs:enumeration value="TOO_MANY_TRIES" />
-        </xs:restriction>
-    </xs:simpleType>
-    
-    <xs:simpleType name="MessageType">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="AwaitMove"/>
-            <xs:enumeration value="Move"/>
-            <xs:enumeration value="Login"/>
-            <xs:enumeration value="LoginReply"/>
-            <xs:enumeration value="Accept"/>
         </xs:restriction>
     </xs:simpleType>
 
@@ -65,6 +57,19 @@
         <xs:attribute name="height" type="xs:int"/>
     </xs:complexType>
 
+    <xs:simpleType name="MessageType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AwaitMove"/>
+            <xs:enumeration value="Move"/>
+            <xs:enumeration value="Login"/>
+            <xs:enumeration value="LoginReply"/>
+            <xs:enumeration value="Accept"/>
+            <xs:enumeration value="MakeWish"/>
+            <xs:enumeration value="Win"/>
+            <xs:enumeration value="Disconnect"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:element name="ChessMessage">
         <xs:complexType>
             <xs:choice>
@@ -75,10 +80,12 @@
                 <xs:element name="MakeWish" type="MakeAWishMessage"/>
                 <xs:element name="Wish" type="WishMessage"/>
                 <xs:element name="Win" type="WinMessage"/>
+                <xs:element name="Accept" type="AcceptMessage"/>
                 <xs:element name="Disconnect" type="DisconnectMessage"/>
             </xs:choice>
             <xs:attribute name="messageType" type="MessageType"/>
             <xs:attribute name="id" type="xs:int"/>
+            <xs:attribute name="gameID" type="xs:int"/>
         </xs:complexType>
     </xs:element>
 
@@ -107,15 +114,28 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:simpleType name="LoginMethod">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="NEW_GAME"/>
+            <xs:enumeration value="JOIN_GAME"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:complexType name="LoginMessage">
         <xs:sequence>
             <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
+            <xs:element name="method" type="LoginMethod" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="gameID" type="xs:int" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="lobbyPass" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="color" type="COLOR" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="LoginReplyMessage">
         <xs:sequence>
             <xs:element name="newID" type="xs:int" minOccurs="1" maxOccurs="1" />
+            <xs:element name="gameID" type="xs:int" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="color" type="COLOR"/>
         </xs:sequence>
     </xs:complexType>
 

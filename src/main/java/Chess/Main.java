@@ -2,6 +2,7 @@ package Chess;
 
 import Chess.Game.Board;
 import Chess.Game.pieces.Chessman;
+import Chess.Server.Server;
 import Chess.generated.ChessFigure;
 import Chess.generated.MoveMessage;
 import Chess.generated.PositionData;
@@ -38,7 +39,7 @@ public class Main {
     public static void main(String[] args) {
         parsArgs(args);
 
-        Board b = new Board();
-        b.printBoardToConsole();
+        Server sv = new Server();
+        sv.start();
     }
 }

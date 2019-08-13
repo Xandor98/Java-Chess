@@ -5,6 +5,8 @@ import Chess.Exceptions.WrongMoveException;
 import Chess.Game.pieces.*;
 import Chess.generated.*;
 import Chess.misc.Logger;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.rmi.NoSuchObjectException;
 import java.util.ArrayList;
@@ -92,8 +94,15 @@ public class Board {
         this.height = data.getHeight();
     }
 
+    public Board(Board board){
+        this.chessmanList.addAll(board.getChessmanList());
+
+        this.width = board.getWidth();
+        this.height = board.getHeight();
+    }
+
     public List<Chessman> getChessmanList() {
-        return chessmanList;
+        return getChessmanList(null);
     }
 
     /**
@@ -131,6 +140,12 @@ public class Board {
         return chessmanList.stream().anyMatch(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1));
     }
 
+    public Pair<Board, Boolean> performFakeMove(MoveMessage message) throws NoSuchFigureException, WrongMoveException, IndexOutOfBoundsException{
+        Board b = new Board(this);
+        boolean res = b.makeMove(message);
+        return new ImmutablePair<>(b, res);
+    }
+
     public void proposeAWish(WishMessage wishMessage){
         if(chessmanList.stream().noneMatch(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1))){
             throw new NoSuchFigureException();
@@ -149,11 +164,39 @@ public class Board {
         chessmanList.add(Chessman.readFigure(nFig));
     }
 
-    public boolean inChess(COLOR color){
-        Chessman king = chessmanList.stream().filter(chessman -> chessman.getColor() == color && chessman.getType().equals(ChessFigureType.KING)).collect(Collectors.toList()).get(0);
+    public List<Chessman> inChess(COLOR color){
+        List<Chessman> kings = chessmanList.stream().filter(chessman -> chessman.getColor() == color && chessman.getType().equals(ChessFigureType.KING)).collect(Collectors.toList());
+        if(kings.size() == 0){
+            return kings;
+        }
 
+        Chessman king = kings.get(0);
         return chessmanList.stream().filter(chessman -> chessman.getColor() == (color.equals(COLOR.WHITE) ? COLOR.BLACK : COLOR.WHITE))
-                .anyMatch(chessman -> chessman.getMovablePositions(this).stream().map(Position::new).anyMatch(position -> position.equals(new Position(king.getPos()))));
+                .filter(chessman -> chessman.getMovablePositions(this).stream().map(Position::new)
+                        .anyMatch(position -> position.equals(new Position(king.getPos())))).collect(Collectors.toList());
+    }
+
+    public List<Chessman> getChessmanList(COLOR color){
+        if(color == null){
+            return chessmanList;
+        }
+        return chessmanList.stream().filter(chessman -> chessman.getColor().equals(color)).collect(Collectors.toList());
+    }
+
+    public Pair<Boolean, COLOR> isWin(){
+        if(inChess(COLOR.WHITE).size() == 0){
+            if (chessmanList.stream().filter(chessman -> chessman.getColor().equals(COLOR.WHITE) && chessman.getType().equals(ChessFigureType.KING))
+                    .collect(Collectors.toList()).get(0).getMovablePositions(this).size() == 0){
+                return new ImmutablePair<>(true, COLOR.BLACK);
+            }
+        }else if(inChess(COLOR.BLACK).size() == 0){
+            if (chessmanList.stream().filter(chessman -> chessman.getColor().equals(COLOR.BLACK) && chessman.getType().equals(ChessFigureType.KING))
+                    .collect(Collectors.toList()).get(0).getMovablePositions(this).size() == 0){
+                return new ImmutablePair<>(true, COLOR.WHITE);
+            }
+        }
+
+        return new ImmutablePair<>(false, null);
     }
 
     public Chessman getFigureByPosition(PositionData data) {

@@ -51,7 +51,6 @@ class QueenTest {
         Chessman c1 = b.getFigureByPosition(4,4);
 
         assertEquals(new Position(c1.getPos()), new Position(4,4));
-        b.printBoardToConsole();
     }
 
     @Test
