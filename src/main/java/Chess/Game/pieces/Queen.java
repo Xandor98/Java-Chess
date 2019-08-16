@@ -9,6 +9,7 @@ import Chess.generated.PositionData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Queen extends Chessman {
 
@@ -22,7 +23,7 @@ public class Queen extends Chessman {
 
     @Override
     public List<PositionData> getMovablePositions(Board board) {
-        List<PositionData> positionData = new ArrayList<>();
+        List<Position> positionData = new ArrayList<>();
 
         Position pos = new Position(this.getPos());
 
@@ -32,11 +33,11 @@ public class Queen extends Chessman {
             while (X < board.getWidth()) {
                 if (board.getFigureByPosition(X, pos.getY()) != null) {
                     if (!board.getFigureByPosition(X, pos.getY()).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(X, pos.getY()).getData());
+                        positionData.add(new Position(X, pos.getY()));
                     }
                     break;
                 }
-                positionData.add(new Position(X, pos.getY()).getData());
+                positionData.add(new Position(X, pos.getY()));
                 X++;
             }
 
@@ -44,11 +45,11 @@ public class Queen extends Chessman {
             while (X >= 0) {
                 if (board.getFigureByPosition(X, pos.getY()) != null) {
                     if (!board.getFigureByPosition(X, pos.getY()).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(X, pos.getY()).getData());
+                        positionData.add(new Position(X, pos.getY()));
                     }
                     break;
                 }
-                positionData.add(new Position(X, pos.getY()).getData());
+                positionData.add(new Position(X, pos.getY()));
                 X--;
             }
 
@@ -56,11 +57,11 @@ public class Queen extends Chessman {
             while (Y < board.getHeight()) {
                 if (board.getFigureByPosition(pos.getX(), Y) != null) {
                     if (!board.getFigureByPosition(pos.getX(), Y).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(pos.getX(), Y).getData());
+                        positionData.add(new Position(pos.getX(), Y));
                     }
                     break;
                 }
-                positionData.add(new Position(pos.getX(), Y).getData());
+                positionData.add(new Position(pos.getX(), Y));
                 Y++;
             }
 
@@ -68,11 +69,11 @@ public class Queen extends Chessman {
             while (Y >= 0) {
                 if (board.getFigureByPosition(pos.getX(), Y) != null) {
                     if (!board.getFigureByPosition(pos.getX(), Y).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(pos.getX(), Y).getData());
+                        positionData.add(new Position(pos.getX(), Y));
                     }
                     break;
                 }
-                positionData.add(new Position(pos.getX(), Y).getData());
+                positionData.add(new Position(pos.getX(), Y));
                 Y--;
             }
         }
@@ -85,11 +86,11 @@ public class Queen extends Chessman {
             while (Y < board.getHeight() && X < board.getWidth()) {
                 if (board.getFigureByPosition(X, Y) != null) {
                     if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(X, Y).getData());
+                        positionData.add(new Position(X, Y));
                     }
                     break;
                 }
-                positionData.add(new Position(X, Y).getData());
+                positionData.add(new Position(X, Y));
                 Y++;
                 X++;
             }
@@ -100,11 +101,11 @@ public class Queen extends Chessman {
             while (Y >= 0 && X >= 0) {
                 if (board.getFigureByPosition(X, Y) != null) {
                     if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(X, Y).getData());
+                        positionData.add(new Position(X, Y));
                     }
                     break;
                 }
-                positionData.add(new Position(X, Y).getData());
+                positionData.add(new Position(X, Y));
                 Y--;
                 X--;
             }
@@ -115,11 +116,11 @@ public class Queen extends Chessman {
             while (Y >= 0 && X < board.getWidth()) {
                 if (board.getFigureByPosition(X, Y) != null) {
                     if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(X, Y).getData());
+                        positionData.add(new Position(X, Y));
                     }
                     break;
                 }
-                positionData.add(new Position(X, Y).getData());
+                positionData.add(new Position(X, Y));
                 Y--;
                 X++;
             }
@@ -130,17 +131,17 @@ public class Queen extends Chessman {
             while (Y < board.getHeight() && X >= 0) {
                 if (board.getFigureByPosition(X, Y) != null) {
                     if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                        positionData.add(new Position(X, Y).getData());
+                        positionData.add(new Position(X, Y));
                     }
                     break;
                 }
-                positionData.add(new Position(X, Y).getData());
+                positionData.add(new Position(X, Y));
                 Y++;
                 X--;
             }
 
         }
 
-        return positionData;
+        return positionData.stream().map(Position::getData).collect(Collectors.toList());
     }
 }

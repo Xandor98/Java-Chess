@@ -10,8 +10,6 @@ import Chess.networking.XmlOutputStream;
 
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.stream.XMLOutputFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
@@ -141,10 +139,10 @@ public class Server {
 
                             System.out.println(GAMEID);
 
-                            Game game = new Game(login.getLobbyPass() != null ? login.getLobbyPass() : "");
+                            Game game = new Game(GAMEID, login.getLobbyPass() != null ? login.getLobbyPass() : "");
                             COLOR gameColor = login.getColor() != null? login.getColor() : getRandomColor();
                             Client client1 = new Client(client, 0, gameColor, login.getName());
-                            game.addClient(client1);
+                            game.registerClient(client1);
 
                             games.put(GAMEID, game);
 
@@ -168,30 +166,55 @@ public class Server {
                                     COLOR gameColor1 = game1.getFreeColor();
                                     Client client2 = new Client(client, 1, gameColor1, login.getName());
 
+                                    int finalGAMEID1 = login.getGameID();
                                     out.write(new ChessMessage(){{
                                         this.setLoginReply(new LoginReplyMessage(){{
-                                            this.setGameID(login.getGameID());
+                                            this.setGameID(finalGAMEID1);
                                             this.setNewID(1);
                                             this.setColor(gameColor1);
                                         }});
                                         this.setMessageType(MessageType.LOGIN_REPLY);
                                         this.setId(1);
-                                        this.setGameID(login.getGameID());
+                                        this.setGameID(finalGAMEID1);
                                     }});
 
-                                    game1.addClient(client2);
+                                    game1.registerClient(client2);
 
                                     truth = true;
                                 }else {
-                                    out.write(new ChessMessage(){{
-                                        this.setAccept(new AcceptMessage(){{
-                                            this.setErrortypeCode(Errortype.WRONG_LOBBY_PASS);
-                                            this.setAccept(false);
+                                    for (Game value : games.values()) {
+                                        if(value.isFreeToJoin()){
+                                            COLOR gameColor1 = value.getFreeColor();
+                                            Client client2 = new Client(client, 1, gameColor1, login.getName());
+
+                                            int finalGAMEID1 = login.getGameID();
+                                            out.write(new ChessMessage(){{
+                                                this.setLoginReply(new LoginReplyMessage(){{
+                                                    this.setGameID(finalGAMEID1);
+                                                    this.setNewID(1);
+                                                    this.setColor(gameColor1);
+                                                }});
+                                                this.setMessageType(MessageType.LOGIN_REPLY);
+                                                this.setId(1);
+                                                this.setGameID(finalGAMEID1);
+                                            }});
+
+                                            value.registerClient(client2);
+
+                                            truth = true;
+                                        }
+                                    }
+                                    if(!truth) {
+                                        out.write(new ChessMessage() {{
+                                            this.setAccept(new AcceptMessage() {{
+                                                this.setErrortypeCode(Errortype.WRONG_LOBBY_PASS);
+                                                this.setAccept(false);
+                                            }});
+                                            this.setMessageType(MessageType.ACCEPT);
+                                            this.setId(-1);
+                                            this.setGameID(-1);
                                         }});
-                                        this.setMessageType(MessageType.ACCEPT);
-                                        this.setId(-1);
-                                        this.setGameID(-1);
-                                    }});
+                                    }
                                 }
                             }else{
                                 out.write(new ChessMessage(){{

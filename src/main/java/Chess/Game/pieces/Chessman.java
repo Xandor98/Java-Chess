@@ -37,10 +37,12 @@ public abstract class Chessman {
         List<Position> positionData = getMovablePositions(board).stream().map(Position::new).collect(Collectors.toList());
 
         List<Position> allChessPositions = new ArrayList<>();
-        chessmen.forEach(chessman -> allChessPositions.addAll(chessman.getMovablePositions(board).stream().map(Position::new)
-                .filter(position -> board.getFigureByPosition(position.getData()) == null).collect(Collectors.toList())));
+        chessmen.forEach(chessman -> {
+            allChessPositions.addAll(chessman.getMovablePositions(board).stream().map(Position::new)
+                    .filter(position -> board.getFigureByPosition(position.getData()) == null).collect(Collectors.toList()));
+        });
 
-        List<PositionData> ret = new ArrayList<>();
+        List<Position> ret = new ArrayList<>();
         if(!this.type.equals(ChessFigureType.KING)) {
             for (Position pos : positionData) {
                 if (allChessPositions.contains(pos)) {
@@ -50,30 +52,22 @@ public abstract class Chessman {
                     }}).getLeft();
 
                     if (b.inChess(this.color).size() == 0) {
-                        ret.add(pos.getData());
+                        ret.add(pos);
                     }
                 }
             }
         }else{
-            for (Position pos : positionData) {
-                Board b = board.performFakeMove(new MoveMessage() {{
-                    this.setFigure(Chessman.this.getFigure());
-                    this.setDestinationPos(pos.getData());
-                }}).getLeft();
-
-                if (b.inChess(this.color).size() == 0) {
-                    ret.add(pos.getData());
-                }
-            }
+            ret.addAll(positionData);
         }
 
-        return ret;
+        return ret.stream().map(Position::getData).collect(Collectors.toList());
     }
 
     public void performMove(PositionData data, Board board) throws WrongMoveException{
         List<Chessman> chessmanList = board.inChess(this.color);
 
         if(chessmanList.size() > 0){
+            Logger.debug("Player", this.color, "is in Chess");
             if(getMovableChessPositions(board, chessmanList).stream().map(Position::new).anyMatch(position -> position.equals(new Position(data)))){
                 Logger.info(this.getColor(), this.getType(), "prevented Chess");
                 Logger.info(this.getColor(), this.getType(), "moved from", new Position(this.pos), "to", new Position(data));

@@ -147,11 +147,11 @@ public class Board {
     }
 
     public void proposeAWish(WishMessage wishMessage){
-        if(chessmanList.stream().noneMatch(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1))){
+        if(chessmanList.stream().noneMatch(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getHeight() - 1))){
             throw new NoSuchFigureException();
         }
 
-        Chessman man = chessmanList.stream().filter(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getWidth() - 1)).collect(Collectors.toList()).get(0);
+        Chessman man = chessmanList.stream().filter(chessman -> chessman.getType().equals(ChessFigureType.PAWN) && (chessman.getPos().getY() == 0 || chessman.getPos().getY() == this.getHeight() - 1)).collect(Collectors.toList()).get(0);
 
         chessmanList.remove(man);
         ChessFigure nFig = new ChessFigure(){{

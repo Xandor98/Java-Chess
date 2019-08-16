@@ -9,6 +9,7 @@ import Chess.generated.PositionData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class King extends Chessman {
 
@@ -23,31 +24,31 @@ public class King extends Chessman {
     @Override
     public List<PositionData> getMovablePositions(Board board) {
         //TODO: Casteling Move
-        List<PositionData> positionData = new ArrayList<>();
+        List<Position> positionData = new ArrayList<>();
 
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() + 1).getData());
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY()).getData());
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() - 1).getData());
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() + 1).getData());
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY()).getData());
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() - 1).getData());
-        positionData.add(new Position(this.getPos().getX(), this.getPos().getY() + 1).getData());
-        positionData.add(new Position(this.getPos().getX(), this.getPos().getY() - 1).getData());
+        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() + 1));
+        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY()));
+        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() - 1));
+        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() + 1));
+        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY()));
+        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() - 1));
+        positionData.add(new Position(this.getPos().getX(), this.getPos().getY() + 1));
+        positionData.add(new Position(this.getPos().getX(), this.getPos().getY() - 1));
 
         board.getChessmanList().stream().filter(chessman -> chessman.getColor() == this.getColor()).forEach(chessman -> {
-            for (PositionData positionDatum : new ArrayList<>(positionData)) {
-                if(new Position(positionDatum).equals(new Position(chessman.getPos()))){
+            for (Position positionDatum : new ArrayList<>(positionData)) {
+                if(positionDatum.equals(new Position(chessman.getPos()))){
                     positionData.remove(positionDatum);
                 }
             }
         });
 
-        board.getChessmanList().stream().filter(chessman -> chessman.getColor() == this.getColor()).forEach(chessman -> {
-            new ArrayList<>(positionData).stream().map(Position::new).forEach(position -> {
-                if(chessman.getMovablePositions(board).stream().map(Position::new).anyMatch(position1 -> position1.equals(position))){
-                    positionData.remove(position.getData());
+        board.getChessmanList().stream().filter(chessman -> chessman.getColor() != this.getColor()).forEach(chessman -> {
+            for (Position position : new ArrayList<>(positionData)) {
+                if (chessman.getMovablePositions(board).stream().map(Position::new).anyMatch(position1 -> position1.equals(position))) {
+                    positionData.remove(position);
                 }
-            });
+            }
         });
 
         if(!this.isMoved()){
@@ -66,7 +67,7 @@ public class King extends Chessman {
                             }
                         }
                         if(canMove){
-                            positionData.add(new Position(this.getPos().getX() - 2, 0).getData());
+                            positionData.add(new Position(this.getPos().getX() - 2, 0));
                         }
                     }
 
@@ -79,7 +80,7 @@ public class King extends Chessman {
                             }
                         }
                         if(canMove){
-                            positionData.add(new Position(this.getPos().getX() + 2, 0).getData());
+                            positionData.add(new Position(this.getPos().getX() + 2, 0));
                         }
                     }
                     break;
@@ -95,7 +96,7 @@ public class King extends Chessman {
                             }
                         }
                         if(canMove){
-                            positionData.add(new Position(this.getPos().getX() - 2, 7).getData());
+                            positionData.add(new Position(this.getPos().getX() - 2, 7));
                         }
                     }
 
@@ -108,13 +109,13 @@ public class King extends Chessman {
                             }
                         }
                         if(canMove){
-                            positionData.add(new Position(this.getPos().getX() + 2, 7).getData());
+                            positionData.add(new Position(this.getPos().getX() + 2, 7));
                         }
                     }
                     break;
             }
         }
 
-        return positionData;
+        return positionData.stream().map(Position::getData).collect(Collectors.toList());
     }
 }

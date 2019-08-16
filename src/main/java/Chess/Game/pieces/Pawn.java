@@ -9,6 +9,7 @@ import Chess.generated.PositionData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Pawn extends Chessman {
 
@@ -22,41 +23,29 @@ public class Pawn extends Chessman {
 
     @Override
     public List<PositionData> getMovablePositions(Board board) {
-        List<PositionData> positionData = new ArrayList<>();
+        List<Position> positionData = new ArrayList<>();
 
         PositionData currPos = this.getPos();
 
         switch (this.getColor()){
             case BLACK:
-                positionData.add(new PositionData(){{
-                    this.setX(currPos.getX());
-                    this.setY(currPos.getY() + 1);
-                }});
+                positionData.add(new Position(currPos.getX(), currPos.getY() + 1));
 
                 if(!this.isMoved()){
-                    positionData.add(new PositionData(){{
-                        this.setX(currPos.getX());
-                        this.setY(currPos.getY() + 2);
-                    }});
+                    positionData.add(new Position(currPos.getX(), currPos.getY() + 2));
                 }
                 break;
             case WHITE:
-                positionData.add(new PositionData(){{
-                    this.setX(currPos.getX());
-                    this.setY(currPos.getY() - 1);
-                }});
+                positionData.add(new Position(currPos.getX(), currPos.getY() - 1));
 
                 if(!this.isMoved()){
-                    positionData.add(new PositionData(){{
-                        this.setX(currPos.getX());
-                        this.setY(currPos.getY() - 2);
-                    }});
+                    positionData.add(new Position(currPos.getX(), currPos.getY() -2));
                 }
                 break;
         }
 
         for (Chessman chessman : board.getChessmanList()) {
-            for (PositionData positionDatum : new ArrayList<>(positionData)) {
+            for (Position positionDatum : new ArrayList<>(positionData)) {
                 if(chessman.getPos().getX() == positionDatum.getX() && chessman.getPos().getY() == positionDatum.getY()){
                     positionData.remove(positionDatum);
                 }
@@ -67,20 +56,20 @@ public class Pawn extends Chessman {
                 case BLACK:
                     if(chessman.getColor() != this.getColor()) {
                         if (new Position(x1, this.getPos().getY() + 1).equals(new Position(chessman.getPos()))) {
-                            positionData.add(chessman.getPos());
+                            positionData.add(new Position(chessman.getPos()));
                         }
                         if (new Position(x2, this.getPos().getY() + 1).equals(new Position(chessman.getPos()))) {
-                            positionData.add(chessman.getPos());
+                            positionData.add(new Position(chessman.getPos()));
                         }
                     }
                     break;
                 case WHITE:
                     if(chessman.getColor() != this.getColor()) {
                         if (new Position(x1, this.getPos().getY() - 1).equals(new Position(chessman.getPos()))) {
-                            positionData.add(chessman.getPos());
+                            positionData.add(new Position(chessman.getPos()));
                         }
                         if (new Position(x2, this.getPos().getY() - 1).equals(new Position(chessman.getPos()))) {
-                            positionData.add(chessman.getPos());
+                            positionData.add(new Position(chessman.getPos()));
                         }
                     }
                     break;
@@ -89,24 +78,24 @@ public class Pawn extends Chessman {
                 switch (this.getColor()){
                     case BLACK:
                         if(new Position(chessman.getPos()).equals(new Position(x1, this.getPos().getY())) && chessman.enPassantPossible){
-                            positionData.add(new Position(x1, this.getPos().getY() + 1).getData());
+                            positionData.add(new Position(x1, this.getPos().getY() + 1));
                         }
                         if(new Position(chessman.getPos()).equals(new Position(x2, this.getPos().getY()))&& chessman.enPassantPossible){
-                            positionData.add(new Position(x2, this.getPos().getY() + 1).getData());
+                            positionData.add(new Position(x2, this.getPos().getY() + 1));
                         }
                         break;
                     case WHITE:
                         if(new Position(chessman.getPos()).equals(new Position(x1, this.getPos().getY())) && chessman.enPassantPossible){
-                            positionData.add(new Position(x1, this.getPos().getY() - 1).getData());
+                            positionData.add(new Position(x1, this.getPos().getY() - 1));
                         }
                         if(new Position(chessman.getPos()).equals(new Position(x2, this.getPos().getY()))&& chessman.enPassantPossible){
-                            positionData.add(new Position(x2, this.getPos().getY() - 1).getData());
+                            positionData.add(new Position(x2, this.getPos().getY() - 1));
                         }
                         break;
                 }
             }
         }
 
-        return positionData;
+        return positionData.stream().map(Position::getData).collect(Collectors.toList());
     }
 }

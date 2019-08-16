@@ -30,6 +30,9 @@
             <xs:enumeration value="ILLEGAL_MOVE" />
             <xs:enumeration value="TIMEOUT" />
             <xs:enumeration value="TOO_MANY_TRIES" />
+            <xs:enumeration value="AWAIT_WISH" />
+            <xs:enumeration value="FIGURE_NOT_FOUND" />
+            <xs:enumeration value="POSITION_OUT_OF_RANGE" />
         </xs:restriction>
     </xs:simpleType>
 
@@ -65,6 +68,7 @@
             <xs:enumeration value="LoginReply"/>
             <xs:enumeration value="Accept"/>
             <xs:enumeration value="MakeWish"/>
+            <xs:enumeration value="Wish"/>
             <xs:enumeration value="Win"/>
             <xs:enumeration value="Disconnect"/>
         </xs:restriction>
