@@ -13,7 +13,7 @@ public class Position {
             y = -1;
         }
         this.x = s.charAt(0) - 'a';
-        this.y = (8 - Integer.parseInt(String.valueOf(s.charAt(1)))) - 1;
+        this.y = (8 - Integer.parseInt(String.valueOf(s.charAt(1))));
     }
 
     public Position(int x, int y) {
@@ -68,9 +68,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return "Position{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+        return "" + ('a' + this.getX()) + (8 - this.getY());
     }
 }

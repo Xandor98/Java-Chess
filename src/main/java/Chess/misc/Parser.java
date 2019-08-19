@@ -47,6 +47,24 @@ public class Parser {
         }
     }
 
+    public static char parseChessman(Chessman chessman){
+        switch (chessman.getType()){
+            case PAWN:
+                return chessman.getColor().equals(COLOR.BLACK) ? 'p' : 'P';
+            case KNIGHT:
+                return chessman.getColor().equals(COLOR.BLACK) ? 'n' : 'N';
+            case KING:
+                return chessman.getColor().equals(COLOR.BLACK) ? 'k' : 'K';
+            case QUEEN:
+                return chessman.getColor().equals(COLOR.BLACK) ? 'q' : 'Q';
+            case BISHOP:
+                return chessman.getColor().equals(COLOR.BLACK) ? 'b' : 'B';
+            case ROOK:
+                return chessman.getColor().equals(COLOR.BLACK) ? 'r' : 'R';
+        }
+        return '-';
+    }
+
     public static Chessman getChessman(Chessman.ChessmanType type, COLOR color, Position position){
         switch (type){
             case PAWN:

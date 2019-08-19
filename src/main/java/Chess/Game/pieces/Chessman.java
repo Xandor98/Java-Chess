@@ -1,9 +1,12 @@
 package Chess.Game.pieces;
 
+import Chess.Exceptions.WrongMoveException;
 import Chess.Game.Board;
 import Chess.Game.Position;
 import Chess.generated.COLOR;
+import Chess.generated.MoveMessage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,6 +16,8 @@ public abstract class Chessman {
     private COLOR color;
     private ChessmanType type;
 
+    private int moves = 0;
+
     public Chessman(ChessmanType type, Position position, COLOR color) {
         this.position = position;
         this.color = color;
@@ -20,6 +25,47 @@ public abstract class Chessman {
     }
 
     public abstract List<Position> getMoves(Board b);
+
+    public List<Position> getChessMoves(Board b, List<Chessman> chessmanList){
+        List<Position> positions = getMoves(b);
+
+        List<Position> ret = new ArrayList<>();
+
+        if(this instanceof King){
+            return positions;
+        }else {
+            for (Chessman chessman : chessmanList) {
+                for (Position pos : positions) {
+                    if (chessman.getMoves(b).contains(pos)) {
+                        Board fake = new Board(b);
+
+                        try {
+                            fake.makeMove(new MoveMessage() {{
+                                this.setFrom(position.toString());
+                                this.setTo(pos.toString());
+                            }});
+                        } catch (Throwable throwable) {
+                            continue;
+                        }
+
+                        if (fake.inChess().size() == 0) {
+                            ret.add(pos);
+                        }
+                    }
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public int getMoves() {
+        return moves;
+    }
+
+    public void setMoves(int moves) {
+        this.moves = moves;
+    }
 
     public ChessmanType getType() {
         return type;

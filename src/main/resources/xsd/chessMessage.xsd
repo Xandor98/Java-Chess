@@ -7,6 +7,12 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="ROCHADE">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[KQkq\-]"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:simpleType name="PositionInfo">
         <xs:restriction base="xs:string">
             <xs:pattern value="[abcdefgh][1-9]"/>
@@ -73,8 +79,7 @@
                 <xs:element name="Disconnect" type="DisconnectMessage"/>
             </xs:choice>
             <xs:attribute name="messageType" type="MessageType"/>
-            <xs:attribute name="id" type="xs:int"/>
-            <xs:attribute name="gameID" type="xs:int"/>
+            <xs:attribute name="color" type="COLOR"/>
         </xs:complexType>
     </xs:element>
 
@@ -98,17 +103,11 @@
 
     <xs:complexType name="MoveMessage">
         <xs:sequence>
-            <xs:element name="from" type="PositionInfo"/>
-            <xs:element name="to" type="PositionInfo"/>
+            <xs:element name="from" type="PositionInfo" minOccurs="0"/>
+            <xs:element name="to" type="PositionInfo" minOccurs="0"/>
+            <xs:element name="rochade" type="ROCHADE" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
-
-    <xs:simpleType name="LoginMethod">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="NEW_GAME"/>
-            <xs:enumeration value="JOIN_GAME"/>
-        </xs:restriction>
-    </xs:simpleType>
 
     <xs:complexType name="LoginMessage">
         <xs:sequence>
@@ -119,7 +118,6 @@
 
     <xs:complexType name="LoginReplyMessage">
         <xs:sequence>
-            <xs:element name="newID" type="xs:int" minOccurs="1" maxOccurs="1" />
             <xs:element name="color" type="COLOR"/>
         </xs:sequence>
     </xs:complexType>

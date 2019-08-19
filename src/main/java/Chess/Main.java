@@ -1,7 +1,10 @@
 package Chess;
 
+import Chess.Exceptions.WrongNotationException;
+import Chess.Game.Board;
 import Chess.Game.pieces.Chessman;
 import Chess.Server.Server;
+import Chess.misc.Parser;
 import Chess.misc.Settings;
 import org.apache.commons.cli.*;
 
@@ -31,10 +34,15 @@ public class Main {
         System.exit(exitCode);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws WrongNotationException {
         parsArgs(args);
 
-        Server sv = new Server();
-        sv.start();
+        Board b = new Board();
+
+        System.out.println(b.getFEN());
+        System.out.println(Parser.FENTester(b.getFEN()));
+
+        //Server sv = new Server();
+        //sv.start();
     }
 }

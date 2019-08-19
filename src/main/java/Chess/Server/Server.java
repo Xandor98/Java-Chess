@@ -1,9 +1,9 @@
 package Chess.Server;
 
+import Chess.Game.Game;
 import Chess.generated.*;
 import Chess.misc.Logger;
 import Chess.misc.Settings;
-import Chess.networking.Client;
 import Chess.networking.XmlInputStream;
 import Chess.networking.XmlOutputStream;
 
@@ -14,15 +14,15 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Server {
 
     private ServerSocket socket;
     private ServerSocket sslSocket;
+
+    private Game game;
 
     public Server() {
     }
@@ -75,7 +75,9 @@ public class Server {
                 sslClientRev.run();
             }
 
-            while(true){
+            game = new Game();
+
+            while(!game.hasStarted()){
                 if(clientRev.isDone()){
                     try {
                         Socket client = clientRev.get();
@@ -124,7 +126,27 @@ public class Server {
             while (!truth){
                 ChessMessage message = in.readChessMessage();
                 if(message.getLogin() != null){
+                    LoginMessage loginMessage = message.getLogin();
+                    COLOR color = loginMessage.getColor();
 
+                    if(game.getFreeColor() != null){
+                        color = game.getFreeColor();
+                    }
+
+                    Client c = new Client(color, client, loginMessage.getName());
+                    game.addClient(c);
+
+                    final COLOR Fcolor = color;
+                    ChessMessage trueMess = new ChessMessage(){{
+                        this.setLoginReply(new LoginReplyMessage(){{
+                            this.setColor(Fcolor);
+                        }});
+                        this.setMessageType(MessageType.LOGIN_REPLY);
+                        this.setColor(Fcolor);
+                    }};
+                    out.write(trueMess);
+
+                    truth = true;
                 }else{
                     ChessMessage falseMess = new ChessMessage(){{
                         this.setAccept(new AcceptMessage(){{
@@ -132,8 +154,7 @@ public class Server {
                             this.setErrortypeCode(Errortype.AWAIT_LOGIN);
                         }});
                         this.setMessageType(MessageType.ACCEPT);
-                        this.setId(-1);
-                        this.setGameID(-1);
+                        this.setColor(null);
                     }};
                     out.write(falseMess);
                 }
