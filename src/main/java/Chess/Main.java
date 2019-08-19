@@ -1,12 +1,7 @@
 package Chess;
 
-import Chess.Game.Board;
 import Chess.Game.pieces.Chessman;
 import Chess.Server.Server;
-import Chess.generated.ChessFigure;
-import Chess.generated.MoveMessage;
-import Chess.generated.PositionData;
-import Chess.misc.Logger;
 import Chess.misc.Settings;
 import org.apache.commons.cli.*;
 

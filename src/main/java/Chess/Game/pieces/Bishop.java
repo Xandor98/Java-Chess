@@ -3,90 +3,92 @@ package Chess.Game.pieces;
 import Chess.Game.Board;
 import Chess.Game.Position;
 import Chess.generated.COLOR;
-import Chess.generated.ChessFigure;
-import Chess.generated.ChessFigureType;
-import Chess.generated.PositionData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Bishop extends Chessman {
 
-    protected Bishop(ChessFigure figure) {
-        this(figure.getColor(), figure.getPos(), figure.isMoved());
-    }
-
-    public Bishop(COLOR color, PositionData data, boolean moved){
-        super(color, data, ChessFigureType.BISHOP, moved);
+    public Bishop(Position position, COLOR color) {
+        super(ChessmanType.BISHOP, position, color);
     }
 
     @Override
-    public List<PositionData> getMovablePositions(Board board) {
-        List<Position> positionData = new ArrayList<>();
+    public List<Position> getMoves(Board b) {
+        List<Position> positions = new ArrayList<>();
 
-        Position pos = new Position(this.getPos());
+        int x = this.getPosition().getX() + 1;
+        int y = this.getPosition().getY() + 1;
 
-        int X = pos.getX() + 1;
-        int Y = pos.getY() + 1;
-
-        while (Y < board.getHeight() && X < board.getWidth()) {
-            if (board.getFigureByPosition(X, Y) != null) {
-                if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                    positionData.add(new Position(X, Y));
+        //RIGHT LOWER
+        while(x < 8 && y < 8){
+            Chessman man;
+            if((man = b.getChessmanByPosition(new Position(x, y))) != null) {
+                if (man.getColor() != this.getColor()) {
+                    positions.add(new Position(x, y));
                 }
                 break;
             }
-            positionData.add(new Position(X, Y));
-            Y++;
-            X++;
+            positions.add(new Position(x,y));
+
+            x++;
+            y++;
         }
 
-        X = pos.getX() - 1;
-        Y = pos.getY() - 1;
+        x = this.getPosition().getX() + 1;
+        y = this.getPosition().getY() - 1;
 
-        while (Y >= 0 && X >= 0) {
-            if (board.getFigureByPosition(X, Y) != null) {
-                if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                    positionData.add(new Position(X, Y));
+        //RIGHT UPPER
+        while(x < 8 && y >= 0){
+            Chessman man;
+            if((man = b.getChessmanByPosition(new Position(x, y))) != null) {
+                if (man.getColor() != this.getColor()) {
+                    positions.add(new Position(x, y));
                 }
                 break;
             }
-            positionData.add(new Position(X, Y));
-            Y--;
-            X--;
+            positions.add(new Position(x,y));
+
+            x++;
+            y--;
         }
 
-        X = pos.getX() + 1;
-        Y = pos.getY() - 1;
+        x = this.getPosition().getX() - 1;
+        y = this.getPosition().getY() + 1;
 
-        while (Y >= 0 && X < board.getWidth()) {
-            if (board.getFigureByPosition(X, Y) != null) {
-                if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                    positionData.add(new Position(X, Y));
+        //Left LOWER
+        while(x >= 0 && y < 8){
+            Chessman man;
+            if((man = b.getChessmanByPosition(new Position(x, y))) != null) {
+                if (man.getColor() != this.getColor()) {
+                    positions.add(new Position(x, y));
                 }
                 break;
             }
-            positionData.add(new Position(X, Y));
-            Y--;
-            X++;
+            positions.add(new Position(x,y));
+
+            x--;
+            y++;
         }
 
-        X = pos.getX() - 1;
-        Y = pos.getY() + 1;
+        x = this.getPosition().getX() - 1;
+        y = this.getPosition().getY() - 1;
 
-        while (Y < board.getHeight() && X >= 0) {
-            if (board.getFigureByPosition(X, Y) != null) {
-                if (!board.getFigureByPosition(X, Y).getColor().equals(this.getColor())) {
-                    positionData.add(new Position(X, Y));
+        //LEFT UPPER
+        while(x >= 0 && y >= 0){
+            Chessman man;
+            if((man = b.getChessmanByPosition(new Position(x, y))) != null) {
+                if (man.getColor() != this.getColor()) {
+                    positions.add(new Position(x, y));
                 }
                 break;
             }
-            positionData.add(new Position(X, Y));
-            Y++;
-            X--;
+            positions.add(new Position(x,y));
+
+            x--;
+            y--;
         }
 
-        return positionData.stream().map(Position::getData).collect(Collectors.toList());
+        return positions;
     }
 }

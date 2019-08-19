@@ -1,7 +1,5 @@
 package Chess.Game;
 
-import Chess.generated.PositionData;
-
 import java.util.Objects;
 
 public class Position {
@@ -9,9 +7,13 @@ public class Position {
     private int x;
     private int y;
 
-    public Position(PositionData data){
-        this.x = data.getX();
-        this.y = data.getY();
+    public Position(String s){
+        if(s.length() != 2){
+            x = -1;
+            y = -1;
+        }
+        this.x = s.charAt(0) - 'a';
+        this.y = (8 - Integer.parseInt(String.valueOf(s.charAt(1)))) - 1;
     }
 
     public Position(int x, int y) {
@@ -24,10 +26,14 @@ public class Position {
         this.y = -1;
     }
 
-    public PositionData getData(){
-        int X = this.x;
-        int Y = this.y;
-        return new PositionData(){{this.setX(X); this.setY(Y);}};
+    public Position add(Position p){
+        this.x += p.getX();
+        this.y += p.getY();
+        return this;
+    }
+
+    public Position add(int x, int y){
+        return add(new Position(x,y));
     }
 
     public int getX() {

@@ -3,119 +3,65 @@ package Chess.Game.pieces;
 import Chess.Game.Board;
 import Chess.Game.Position;
 import Chess.generated.COLOR;
-import Chess.generated.ChessFigure;
-import Chess.generated.ChessFigureType;
-import Chess.generated.PositionData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class King extends Chessman {
 
-    protected King(ChessFigure figure) {
-        this(figure.getColor(), figure.getPos(), figure.isMoved());
-    }
-
-    public King(COLOR color, PositionData data, boolean moved){
-        super(color, data, ChessFigureType.KING, moved);
+    public King(Position position, COLOR color) {
+        super(ChessmanType.KING, position, color);
     }
 
     @Override
-    public List<PositionData> getMovablePositions(Board board) {
-        //TODO: Casteling Move
-        List<Position> positionData = new ArrayList<>();
+    public List<Position> getMoves(Board b) {
+        List<Position> positions = new ArrayList<>();
 
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() + 1));
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY()));
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() - 1));
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() + 1));
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY()));
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() - 1));
-        positionData.add(new Position(this.getPos().getX(), this.getPos().getY() + 1));
-        positionData.add(new Position(this.getPos().getX(), this.getPos().getY() - 1));
+        positions.add(this.getPosition().add(1,-1));
+        positions.add(this.getPosition().add(1,0));
+        positions.add(this.getPosition().add(1,1));
+        positions.add(this.getPosition().add(0,1));
+        positions.add(this.getPosition().add(-1,1));
+        positions.add(this.getPosition().add(-1,0));
+        positions.add(this.getPosition().add(-1,-1));
+        positions.add(this.getPosition().add(0,-1));
 
-        board.getChessmanList().stream().filter(chessman -> chessman.getColor() == this.getColor()).forEach(chessman -> {
-            for (Position positionDatum : new ArrayList<>(positionData)) {
-                if(positionDatum.equals(new Position(chessman.getPos()))){
-                    positionData.remove(positionDatum);
-                }
-            }
-        });
-
-        board.getChessmanList().stream().filter(chessman -> chessman.getColor() != this.getColor()).forEach(chessman -> {
-            for (Position position : new ArrayList<>(positionData)) {
-                if (chessman.getMovablePositions(board).stream().map(Position::new).anyMatch(position1 -> position1.equals(position))) {
-                    positionData.remove(position);
-                }
-            }
-        });
-
-        if(!this.isMoved()){
-            Chessman c1 = null;
-            Chessman c2 = null;
-            switch (this.getColor()){
-                case BLACK:
-                    c1 = board.getFigureByPosition(0,0);
-                    c2 = board.getFigureByPosition(7,0);
-                    if(c1 != null && !c1.isMoved() && c1.getType().equals(ChessFigureType.ROOK)){
-                        boolean canMove = true;
-                        for (int x = 1; x < this.getPos().getX(); x++){
-                            if(board.getFigureByPosition(x, 0) != null){
-                                canMove = false;
-                                break;
-                            }
-                        }
-                        if(canMove){
-                            positionData.add(new Position(this.getPos().getX() - 2, 0));
-                        }
-                    }
-
-                    if(c2 != null && !c2.isMoved() && c2.getType().equals(ChessFigureType.ROOK)){
-                        boolean canMove = true;
-                        for (int x = this.getPos().getX() + 1; x < board.getWidth(); x++){
-                            if(board.getFigureByPosition(x, 0) != null){
-                                canMove = false;
-                                break;
-                            }
-                        }
-                        if(canMove){
-                            positionData.add(new Position(this.getPos().getX() + 2, 0));
-                        }
-                    }
-                    break;
-                case WHITE:
-                    c1 = board.getFigureByPosition(0,7);
-                    c2 = board.getFigureByPosition(7,7);
-                    if(c1 != null && !c1.isMoved() && c1.getType().equals(ChessFigureType.ROOK)){
-                        boolean canMove = true;
-                        for (int x = 1; x < this.getPos().getX(); x++){
-                            if(board.getFigureByPosition(x, 7) != null){
-                                canMove = false;
-                                break;
-                            }
-                        }
-                        if(canMove){
-                            positionData.add(new Position(this.getPos().getX() - 2, 7));
-                        }
-                    }
-
-                    if(c2 != null && !c2.isMoved() && c2.getType().equals(ChessFigureType.ROOK)){
-                        boolean canMove = true;
-                        for (int x = this.getPos().getX() + 1; x < board.getWidth(); x++){
-                            if(board.getFigureByPosition(x, 7) != null){
-                                canMove = false;
-                                break;
-                            }
-                        }
-                        if(canMove){
-                            positionData.add(new Position(this.getPos().getX() + 2, 7));
-                        }
-                    }
-                    break;
+        for (Position position : new ArrayList<>(positions)) {
+            Chessman chessman;
+            if((chessman = b.getChessmanByPosition(position)) != null && chessman.getColor() == this.getColor()){
+                positions.remove(position);
             }
         }
 
-        return positionData.stream().map(Position::getData).collect(Collectors.toList());
+        for (Chessman chessman : b.getChessmanList(this.getColor().equals(COLOR.WHITE) ? COLOR.BLACK : COLOR.WHITE)) {
+            if(chessman instanceof King){
+
+                List<Position> kingPos = new ArrayList<>();
+
+                kingPos.add(chessman.getPosition().add(1,-1));
+                kingPos.add(chessman.getPosition().add(1,0));
+                kingPos.add(chessman.getPosition().add(1,1));
+                kingPos.add(chessman.getPosition().add(0,1));
+                kingPos.add(chessman.getPosition().add(-1,1));
+                kingPos.add(chessman.getPosition().add(-1,0));
+                kingPos.add(chessman.getPosition().add(-1,-1));
+                kingPos.add(chessman.getPosition().add(0,-1));
+
+                for (Position position : new ArrayList<>(positions)) {
+                    if(kingPos.contains(position)){
+                        positions.remove(position);
+                    }
+                }
+
+                continue;
+            }
+            for (Position position : new ArrayList<>(positions)) {
+                if(chessman.getMoves(b).contains(position)){
+                    positions.remove(position);
+                }
+            }
+        }
+
+        return positions;
     }
 }

@@ -1,6 +1,5 @@
 package Chess.Server;
 
-import Chess.Game.Game;
 import Chess.generated.*;
 import Chess.misc.Logger;
 import Chess.misc.Settings;
@@ -25,10 +24,7 @@ public class Server {
     private ServerSocket socket;
     private ServerSocket sslSocket;
 
-    private ConcurrentHashMap<Integer, Game> games;
-
     public Server() {
-        this.games = new ConcurrentHashMap<>();
     }
 
     private void printAllListeningConnections(ServerSocket s, boolean ssl) throws SocketException {
@@ -128,107 +124,7 @@ public class Server {
             while (!truth){
                 ChessMessage message = in.readChessMessage();
                 if(message.getLogin() != null){
-                    LoginMessage login = message.getLogin();
-                    switch (login.getMethod()){
-                        case NEW_GAME:
-                            int GAMEID = ThreadLocalRandom.current().nextInt(1000, 10000);
 
-                            while(games.keySet().contains(GAMEID)){
-                                GAMEID = ThreadLocalRandom.current().nextInt(1000, 10000);
-                            }
-
-                            System.out.println(GAMEID);
-
-                            Game game = new Game(GAMEID, login.getLobbyPass() != null ? login.getLobbyPass() : "");
-                            COLOR gameColor = login.getColor() != null? login.getColor() : getRandomColor();
-                            Client client1 = new Client(client, 0, gameColor, login.getName());
-                            game.registerClient(client1);
-
-                            games.put(GAMEID, game);
-
-                            int finalGAMEID = GAMEID;
-                            out.write(new ChessMessage(){{
-                                this.setLoginReply(new LoginReplyMessage(){{
-                                    this.setGameID(finalGAMEID);
-                                    this.setNewID(0);
-                                    this.setColor(gameColor);
-                                }});
-                                this.setMessageType(MessageType.LOGIN_REPLY);
-                                this.setId(0);
-                                this.setGameID(finalGAMEID);
-                            }});
-                            truth = true;
-                            break;
-                        case JOIN_GAME:
-                            if(games.containsKey(login.getGameID())){
-                                if(games.get(login.getGameID()).verify(login.getLobbyPass() != null ? login.getLobbyPass() : "")){
-                                    Game game1 = games.get(login.getGameID());
-                                    COLOR gameColor1 = game1.getFreeColor();
-                                    Client client2 = new Client(client, 1, gameColor1, login.getName());
-
-                                    int finalGAMEID1 = login.getGameID();
-                                    out.write(new ChessMessage(){{
-                                        this.setLoginReply(new LoginReplyMessage(){{
-                                            this.setGameID(finalGAMEID1);
-                                            this.setNewID(1);
-                                            this.setColor(gameColor1);
-                                        }});
-                                        this.setMessageType(MessageType.LOGIN_REPLY);
-                                        this.setId(1);
-                                        this.setGameID(finalGAMEID1);
-                                    }});
-
-                                    game1.registerClient(client2);
-
-                                    truth = true;
-                                }else {
-                                    for (Game value : games.values()) {
-                                        if(value.isFreeToJoin()){
-                                            COLOR gameColor1 = value.getFreeColor();
-                                            Client client2 = new Client(client, 1, gameColor1, login.getName());
-
-                                            int finalGAMEID1 = login.getGameID();
-                                            out.write(new ChessMessage(){{
-                                                this.setLoginReply(new LoginReplyMessage(){{
-                                                    this.setGameID(finalGAMEID1);
-                                                    this.setNewID(1);
-                                                    this.setColor(gameColor1);
-                                                }});
-                                                this.setMessageType(MessageType.LOGIN_REPLY);
-                                                this.setId(1);
-                                                this.setGameID(finalGAMEID1);
-                                            }});
-
-                                            value.registerClient(client2);
-
-                                            truth = true;
-                                        }
-                                    }
-                                    if(!truth) {
-                                        out.write(new ChessMessage() {{
-                                            this.setAccept(new AcceptMessage() {{
-                                                this.setErrortypeCode(Errortype.WRONG_LOBBY_PASS);
-                                                this.setAccept(false);
-                                            }});
-                                            this.setMessageType(MessageType.ACCEPT);
-                                            this.setId(-1);
-                                            this.setGameID(-1);
-                                        }});
-                                    }
-                                }
-                            }else{
-                                out.write(new ChessMessage(){{
-                                    this.setAccept(new AcceptMessage(){{
-                                        this.setErrortypeCode(Errortype.NO_GAME_FOUND);
-                                        this.setAccept(false);
-                                    }});
-                                    this.setMessageType(MessageType.ACCEPT);
-                                    this.setId(-1);
-                                    this.setGameID(-1);
-                                }});
-                            }
-                            break;
-                    }
                 }else{
                     ChessMessage falseMess = new ChessMessage(){{
                         this.setAccept(new AcceptMessage(){{

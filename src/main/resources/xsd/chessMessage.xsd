@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-    <xs:complexType name="positionData">
-        <xs:sequence>
-            <xs:element name="X" type="xs:int"/>
-            <xs:element name="Y" type="xs:int"/>
-        </xs:sequence>
-    </xs:complexType>
-
-    <xs:simpleType name="chessFigureType" final="restriction">
+    <xs:simpleType name="FEN">
         <xs:restriction base="xs:string">
-            <xs:enumeration value="PAWN"/>
-            <xs:enumeration value="KING"/>
-            <xs:enumeration value="QUEEN"/>
-            <xs:enumeration value="ROOK"/>
-            <xs:enumeration value="BISHOP"/>
-            <xs:enumeration value="KNIGHT"/>
+            <xs:pattern value="(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+/)(([rnbqkbnrpRNBQKBNRP]|[1-8])+) [wb] ([KQkq]*|-) (-|([abcdefgh][36])) [0-9]+ [0-9]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PositionInfo">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[abcdefgh][1-9]"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="FigureType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[rnbqkbnrpRNBQKBNRP]"/>
         </xs:restriction>
     </xs:simpleType>
 
@@ -24,15 +24,11 @@
             <xs:enumeration value="NOERROR" />
             <xs:enumeration value="ERROR" />
             <xs:enumeration value="AWAIT_LOGIN" />
-            <xs:enumeration value="WRONG_LOBBY_PASS"/>
-            <xs:enumeration value="NO_GAME_FOUND"/>
             <xs:enumeration value="AWAIT_MOVE" />
             <xs:enumeration value="ILLEGAL_MOVE" />
             <xs:enumeration value="TIMEOUT" />
             <xs:enumeration value="TOO_MANY_TRIES" />
             <xs:enumeration value="AWAIT_WISH" />
-            <xs:enumeration value="FIGURE_NOT_FOUND" />
-            <xs:enumeration value="POSITION_OUT_OF_RANGE" />
         </xs:restriction>
     </xs:simpleType>
 
@@ -42,22 +38,11 @@
             <xs:enumeration value="WHITE"/>
         </xs:restriction>
     </xs:simpleType>
-
-    <xs:complexType name="chessFigure">
-        <xs:sequence>
-            <xs:element name="pos" type="positionData"/>
-        </xs:sequence>
-        <xs:attribute name="moved" type="xs:boolean"/>
-        <xs:attribute name="type" type="chessFigureType"/>
-        <xs:attribute name="color" type="COLOR"/>
-    </xs:complexType>
     
     <xs:complexType name="BoardData">
         <xs:sequence>
-            <xs:element name="figure" type="chessFigure" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="FEN" type="FEN"/>
         </xs:sequence>
-        <xs:attribute name="width" type="xs:int"/>
-        <xs:attribute name="height" type="xs:int"/>
     </xs:complexType>
 
     <xs:simpleType name="MessageType">
@@ -107,14 +92,14 @@
 
     <xs:complexType name="WishMessage">
         <xs:sequence>
-            <xs:element name="newFigure" type="chessFigureType"/>
+            <xs:element name="newFigure" type="FigureType"/>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="MoveMessage">
         <xs:sequence>
-            <xs:element name="figure" type="chessFigure"/>
-            <xs:element name="destinationPos" type="positionData"/>
+            <xs:element name="from" type="PositionInfo"/>
+            <xs:element name="to" type="PositionInfo"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -128,9 +113,6 @@
     <xs:complexType name="LoginMessage">
         <xs:sequence>
             <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
-            <xs:element name="method" type="LoginMethod" minOccurs="1" maxOccurs="1"/>
-            <xs:element name="gameID" type="xs:int" minOccurs="0" maxOccurs="1"/>
-            <xs:element name="lobbyPass" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="color" type="COLOR" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
@@ -138,7 +120,6 @@
     <xs:complexType name="LoginReplyMessage">
         <xs:sequence>
             <xs:element name="newID" type="xs:int" minOccurs="1" maxOccurs="1" />
-            <xs:element name="gameID" type="xs:int" minOccurs="1" maxOccurs="1"/>
             <xs:element name="color" type="COLOR"/>
         </xs:sequence>
     </xs:complexType>
@@ -154,6 +135,7 @@
         <xs:sequence>
             <xs:element name="board" type="BoardData" />
             <xs:element name="winner" type="COLOR"/>
+            <xs:element name="remis" type="xs:boolean"/>
         </xs:sequence>
     </xs:complexType>
 

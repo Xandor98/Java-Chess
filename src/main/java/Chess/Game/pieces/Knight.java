@@ -3,45 +3,36 @@ package Chess.Game.pieces;
 import Chess.Game.Board;
 import Chess.Game.Position;
 import Chess.generated.COLOR;
-import Chess.generated.ChessFigure;
-import Chess.generated.ChessFigureType;
-import Chess.generated.PositionData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Knight extends Chessman {
 
-    protected Knight(ChessFigure figure) {
-        this(figure.getColor(), figure.getPos(), figure.isMoved());
-    }
-
-    public Knight(COLOR color, PositionData data, boolean moved){
-        super(color, data, ChessFigureType.KNIGHT, moved);
+    public Knight(Position position, COLOR color) {
+        super(ChessmanType.KNIGHT, position, color);
     }
 
     @Override
-    public List<PositionData> getMovablePositions(Board board) {
-        List<Position> positionData = new ArrayList<>();
+    public List<Position> getMoves(Board b) {
+        List<Position> positions = new ArrayList<>();
 
-        positionData.add(new Position(this.getPos().getX() + 2, this.getPos().getY() + 1));
-        positionData.add(new Position(this.getPos().getX() + 2, this.getPos().getY() - 1));
-        positionData.add(new Position(this.getPos().getX() - 2, this.getPos().getY() + 1));
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() + 2));
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() + 2));
-        positionData.add(new Position(this.getPos().getX() - 2, this.getPos().getY() - 1));
-        positionData.add(new Position(this.getPos().getX() + 1, this.getPos().getY() - 2));
-        positionData.add(new Position(this.getPos().getX() - 1, this.getPos().getY() - 2));
+        positions.add(this.getPosition().add(2, 1));
+        positions.add(this.getPosition().add(2, -1));
+        positions.add(this.getPosition().add(-2, 1));
+        positions.add(this.getPosition().add(-2, -1));
+        positions.add(this.getPosition().add(1, 2));
+        positions.add(this.getPosition().add(-1, 2));
+        positions.add(this.getPosition().add(1, -2));
+        positions.add(this.getPosition().add(-1, -2));
 
-        for(Position pos : new ArrayList<>(positionData)){
-            if(board.getFigureByPosition(pos.getData()) != null && board.getFigureByPosition(pos.getData()).getColor().equals(this.getColor())){
-                positionData.remove(pos);
-            }else if(pos.getX() < 0 || pos.getY() < 0 ||pos.getX() >= board.getWidth() || pos.getY() >= board.getHeight()){
-                positionData.remove(pos);
+        for (Position position : new ArrayList<>(positions)) {
+            Chessman chessman;
+            if((chessman = b.getChessmanByPosition(position)) != null && chessman.getColor() == this.getColor()){
+                positions.remove(position);
             }
         }
 
-        return positionData.stream().map(Position::getData).collect(Collectors.toList());
+        return positions;
     }
 }
