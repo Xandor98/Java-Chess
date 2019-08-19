@@ -37,12 +37,7 @@ public class Main {
     public static void main(String[] args) throws WrongNotationException {
         parsArgs(args);
 
-        Board b = new Board();
-
-        System.out.println(b.getFEN());
-        System.out.println(Parser.FENTester(b.getFEN()));
-
-        //Server sv = new Server();
-        //sv.start();
+        Server sv = new Server();
+        sv.start();
     }
 }

@@ -8,6 +8,8 @@ import Chess.Game.pieces.Pawn;
 import Chess.Game.pieces.Rook;
 import Chess.generated.COLOR;
 import Chess.generated.MoveMessage;
+import Chess.generated.WishMessage;
+import Chess.misc.Logger;
 import Chess.misc.Parser;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -27,6 +29,8 @@ public class Board {
 
     private int round;
     private int halfMoveClock;
+
+    private COLOR canMakeWish = null;
 
     private HashMap<COLOR, Boolean> rochade;
 
@@ -306,9 +310,32 @@ public class Board {
             positions = men.getMoves(this);
         }
 
+        if(men instanceof Pawn){
+            if(dest.equals(enPassent)){
+                switch (currentPlayer){
+                    case WHITE:
+                        chessmanList.remove(getChessmanByPosition(enPassent.add(0, -1)));
+                        break;
+                    case BLACK:
+                        chessmanList.remove(getChessmanByPosition(enPassent.add(0, 1)));
+                        break;
+                }
+                men.setPosition(enPassent);
+
+                Logger.info(men.getColor(), men.getType(), "does a enPassent on Position", enPassent);
+
+                currentPlayer = currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK;
+                round++;
+
+                return;
+            }
+        }
+
         if(positions.contains(dest)){
             if(this.getChessmanByPosition(dest) != null){
-                chessmanList.remove(this.getChessmanByPosition(dest));
+                Chessman slain = this.getChessmanByPosition(dest);
+                chessmanList.remove(slain);
+                Logger.info(men.getColor(), men.getType(), "has slain", slain.getColor(), slain.getType());
                 halfMoveClock = 0;
             }else if(! (men instanceof Pawn)){
                 halfMoveClock++;
@@ -330,6 +357,7 @@ public class Board {
                 enPassent = null;
             }
 
+            Logger.info(men.getColor(), men.getType(), "moved from", men.getPosition(), "to", dest);
             men.setPosition(dest);
             men.setMoves(men.getMoves() + 1);
 
@@ -341,8 +369,35 @@ public class Board {
             throw new WrongMoveException();
         }
 
+        for (Chessman chessman : chessmanList) {
+            if(chessman.getPosition().getY() == 0 || chessman.getPosition().getY() == 7){
+                canMakeWish = chessman.getColor();
+                break;
+            }
+            canMakeWish = null;
+        }
+
         currentPlayer = currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK;
         round++;
+    }
+
+    public void makeWish(WishMessage message){
+        for (Chessman chessman : new ArrayList<>(chessmanList)) {
+            if(chessman.getPosition().getY() == 0 || chessman.getPosition().getY() == 7){
+                chessmanList.remove(chessman);
+                Pair<COLOR, Chessman.ChessmanType> tmp = Parser.parseChessman(message.getNewFigure().charAt(0));
+                if(tmp != null) {
+                    chessmanList.add(Parser.getChessman(tmp.getRight(), chessman.getColor(), chessman.getPosition()));
+                }else{
+                    throw new IllegalArgumentException();
+                }
+                break;
+            }
+        }
+    }
+
+    public boolean canMakeWish(){
+        return canMakeWish == null;
     }
 
     public String getFEN(){
@@ -399,6 +454,10 @@ public class Board {
         FEN.append(halfMoveClock).append(" ").append(round);
 
         return FEN.toString();
+    }
+
+    public COLOR getCurrentPlayer() {
+        return currentPlayer;
     }
 
     public List<Chessman> getChessmanList(COLOR color){
