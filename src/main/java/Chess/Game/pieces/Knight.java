@@ -33,6 +33,12 @@ public class Knight extends Chessman {
             }
         }
 
+        for (Position position : new ArrayList<>(positions)) {
+            if(position.getX() < 0 || position.getX() > 7 || position.getY() < 0 || position.getY() > 7){
+                positions.remove(position);
+            }
+        }
+
         return positions;
     }
 }

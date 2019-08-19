@@ -134,7 +134,6 @@ public class Server {
                     }
 
                     Client c = new Client(color, client, loginMessage.getName());
-                    game.addClient(c);
 
                     final COLOR Fcolor = color;
                     ChessMessage trueMess = new ChessMessage(){{
@@ -146,6 +145,7 @@ public class Server {
                     }};
                     out.write(trueMess);
 
+                    game.addClient(c);
                     truth = true;
                 }else{
                     ChessMessage falseMess = new ChessMessage(){{

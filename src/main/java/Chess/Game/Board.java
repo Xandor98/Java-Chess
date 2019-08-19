@@ -346,9 +346,9 @@ public class Board {
                 if(Math.abs(dest.getY() - men.getPosition().getY()) == 2){
                     switch (men.getColor()){
                         case BLACK:
-                            enPassent = dest.add(0, -1);
+                            enPassent = new Position(men.getPosition().getX(), 3);
                         case WHITE:
-                            enPassent = dest.add(0, 1);
+                            enPassent = new Position(men.getPosition().getX(), 5);
                     }
                 }else{
                     enPassent = null;
@@ -358,6 +358,9 @@ public class Board {
             }
 
             Logger.info(men.getColor(), men.getType(), "moved from", men.getPosition(), "to", dest);
+            if(enPassent != null){
+                Logger.info("EnPassant:", enPassent.getX() + "|" + enPassent.getY());
+            }
             men.setPosition(dest);
             men.setMoves(men.getMoves() + 1);
 
@@ -370,12 +373,17 @@ public class Board {
         }
 
         for (Chessman chessman : chessmanList) {
-            if(chessman.getPosition().getY() == 0 || chessman.getPosition().getY() == 7){
-                canMakeWish = chessman.getColor();
-                break;
+            if(chessman instanceof Pawn) {
+                if (chessman.getPosition().getY() == 0 || chessman.getPosition().getY() == 7) {
+                    canMakeWish = chessman.getColor();
+                    break;
+                }
             }
             canMakeWish = null;
         }
+
+        System.out.println(enPassent);
+        System.out.println(canMakeWish);
 
         currentPlayer = currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK;
         round++;
@@ -383,21 +391,23 @@ public class Board {
 
     public void makeWish(WishMessage message){
         for (Chessman chessman : new ArrayList<>(chessmanList)) {
-            if(chessman.getPosition().getY() == 0 || chessman.getPosition().getY() == 7){
-                chessmanList.remove(chessman);
-                Pair<COLOR, Chessman.ChessmanType> tmp = Parser.parseChessman(message.getNewFigure().charAt(0));
-                if(tmp != null) {
-                    chessmanList.add(Parser.getChessman(tmp.getRight(), chessman.getColor(), chessman.getPosition()));
-                }else{
-                    throw new IllegalArgumentException();
+            if(chessman instanceof Pawn) {
+                if (chessman.getPosition().getY() == 0 || chessman.getPosition().getY() == 7) {
+                    chessmanList.remove(chessman);
+                    Pair<COLOR, Chessman.ChessmanType> tmp = Parser.parseChessman(message.getNewFigure().charAt(0));
+                    if (tmp != null) {
+                        chessmanList.add(Parser.getChessman(tmp.getRight(), chessman.getColor(), chessman.getPosition()));
+                    } else {
+                        throw new IllegalArgumentException();
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
 
     public boolean canMakeWish(){
-        return canMakeWish == null;
+        return canMakeWish != null;
     }
 
     public String getFEN(){
@@ -410,6 +420,7 @@ public class Board {
                 if((man = this.getChessmanByPosition(new Position(x, y))) != null){
                     if(leer != 0){
                         FEN.append(leer);
+                        leer = 0;
                     }
                     FEN.append(Parser.parseChessman(man));
                 }else{
@@ -428,21 +439,31 @@ public class Board {
 
         String rochade = "";
         if(!this.rochade.get(COLOR.WHITE)){
-            if(getChessmanByPosition(new Position(7,7)) != null && getChessmanByPosition(new Position(7,07)).getMoves() == 0 ){
-                rochade += "K";
-            }
-            if(getChessmanByPosition(new Position(7,7)) != null && getChessmanByPosition(new Position(0,7)).getMoves() == 0 ){
-                rochade += "Q";
-            }
+            try {
+                if (getChessmanByPosition(new Position(7, 7)) != null && getChessmanByPosition(new Position(7, 7)).getMoves() == 0) {
+                    rochade += "K";
+                }
+            }catch (NullPointerException ignored){}
+
+            try {
+                if (getChessmanByPosition(new Position(7, 7)) != null && getChessmanByPosition(new Position(0, 7)).getMoves() == 0) {
+                    rochade += "Q";
+                }
+            }catch (NullPointerException ignored){}
         }
 
         if(!this.rochade.get(COLOR.BLACK)){
-            if(getChessmanByPosition(new Position(7,0)) != null && getChessmanByPosition(new Position(7,0)).getMoves() == 0 ){
-                rochade += "k";
-            }
-            if(getChessmanByPosition(new Position(7,0)) != null && getChessmanByPosition(new Position(0,0)).getMoves() == 0 ){
-                rochade += "q";
-            }
+            try{
+                if(getChessmanByPosition(new Position(7,0)) != null && getChessmanByPosition(new Position(7,0)).getMoves() == 0 ){
+                    rochade += "k";
+                }
+            }catch (NullPointerException ignored){}
+
+            try{
+                if(getChessmanByPosition(new Position(0,0)) != null && getChessmanByPosition(new Position(0,0)).getMoves() == 0 ){
+                    rochade += "q";
+                }
+            }catch (NullPointerException ignored){}
         }
 
         if(rochade.equals("")){
@@ -468,5 +489,24 @@ public class Board {
     public Chessman getChessmanByPosition(Position p){
         Optional<Chessman> opt = chessmanList.stream().filter(chessman -> chessman.getPosition().equals(p)).findFirst();
         return opt.orElse(null);
+    }
+
+    public void printBoard() {
+        StringBuilder s = new StringBuilder();
+
+        for(int y = 0; y < 8; y++){
+            s.append("|");
+            for(int x = 0; x < 8; x++){
+                if(this.getChessmanByPosition(new Position(x, y)) != null){
+                    s.append(Parser.parseChessman(this.getChessmanByPosition(new Position(x, y))));
+                }else{
+                    s.append(" ");
+                }
+                s.append("|");
+            }
+            s.append("\n");
+        }
+
+        Logger.info(s);
     }
 }

@@ -2,6 +2,7 @@ package Chess.Game.pieces;
 
 import Chess.Game.Board;
 import Chess.Game.Position;
+import Chess.generated.AcceptMessage;
 import Chess.generated.COLOR;
 
 import java.util.ArrayList;
@@ -59,6 +60,12 @@ public class King extends Chessman {
                 if(chessman.getMoves(b).contains(position)){
                     positions.remove(position);
                 }
+            }
+        }
+
+        for (Position position : new ArrayList<>(positions)) {
+            if(position.getX() < 0 || position.getX() > 7 || position.getY() < 0 || position.getY() > 7){
+                positions.remove(position);
             }
         }
 

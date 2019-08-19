@@ -28,7 +28,7 @@ public class Pawn extends Chessman {
                 break;
             case WHITE:
                 positions.add(new Position(current.getX(), current.getY() - 1));
-                if(current.getY() == 7){
+                if(current.getY() == 6){
                     positions.add(new Position(current.getX(), current.getY() - 2));
                 }
                 break;
@@ -42,23 +42,33 @@ public class Pawn extends Chessman {
 
         switch (this.getColor()){
             case BLACK:
-                if(b.getChessmanByPosition(new Position(current.getX() + 1, current.getY() + 1)) != null){
+                if(b.getChessmanByPosition(new Position(current.getX() + 1, current.getY() + 1)) != null
+                        && b.getChessmanByPosition(new Position(current.getX() + 1, current.getY() + 1)).getColor() == COLOR.WHITE){
                     positions.add(new Position(current.getX() + 1, current.getY() + 1));
                 }
 
-                if(b.getChessmanByPosition(new Position(current.getX() - 1, current.getY() + 1)) != null){
-                    positions.add(new Position(current.getX() + 1, current.getY() + 1));
+                if(b.getChessmanByPosition(new Position(current.getX() - 1, current.getY() + 1)) != null
+                        && b.getChessmanByPosition(new Position(current.getX() - 1, current.getY() + 1)).getColor() == COLOR.WHITE){
+                    positions.add(new Position(current.getX() - 1, current.getY() + 1));
                 }
                 break;
             case WHITE:
-                if(b.getChessmanByPosition(new Position(current.getX() + 1, current.getY() - 1)) != null){
-                    positions.add(new Position(current.getX() + 1, current.getY() + 1));
-                }
-
-                if(b.getChessmanByPosition(new Position(current.getX() - 1, current.getY() - 1)) != null){
+                if(b.getChessmanByPosition(new Position(current.getX() + 1, current.getY() - 1)) != null
+                        && b.getChessmanByPosition(new Position(current.getX() + 1, current.getY() - 1)).getColor() == COLOR.BLACK){
                     positions.add(new Position(current.getX() + 1, current.getY() - 1));
                 }
+
+                if(b.getChessmanByPosition(new Position(current.getX() - 1, current.getY() - 1)) != null
+                        && b.getChessmanByPosition(new Position(current.getX() - 1, current.getY() - 1)).getColor() == COLOR.BLACK){
+                    positions.add(new Position(current.getX() - 1, current.getY() - 1));
+                }
                 break;
+        }
+
+        for (Position position : new ArrayList<>(positions)) {
+            if(position.getX() < 0 || position.getX() > 7 || position.getY() < 0 || position.getY() > 7){
+                positions.remove(position);
+            }
         }
 
         return positions;

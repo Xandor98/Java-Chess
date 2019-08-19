@@ -3,6 +3,7 @@ package Chess.Game;
 import Chess.Exceptions.WrongNotationException;
 import Chess.Server.Client;
 import Chess.generated.*;
+import Chess.misc.Logger;
 import Chess.networking.XmlInputStream;
 import Chess.networking.XmlOutputStream;
 
@@ -48,6 +49,8 @@ public class Game {
                 if(b.canMakeWish()){
                     makeWish(clients.get(current), b);
                 }
+
+                b.printBoard();
             } catch (IOException | UnmarshalException e) {
                 e.printStackTrace();
             }

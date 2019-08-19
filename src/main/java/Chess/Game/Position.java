@@ -68,6 +68,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return "" + ('a' + this.getX()) + (8 - this.getY());
+        return "" + (char)('a' + this.getX()) + (8 - this.getY());
     }
 }
