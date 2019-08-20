@@ -10,6 +10,7 @@ import Chess.networking.XmlOutputStream;
 import javax.xml.bind.UnmarshalException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.*;
 
 public class Game {
 
@@ -114,7 +115,7 @@ public class Game {
         }while(true);
     }
 
-    public void makeMove(Client client, Board b) throws IOException, UnmarshalException {
+    public void makeMove(Client client, Board b) throws IOException {
         XmlOutputStream out = new XmlOutputStream(client.getSocket().getOutputStream());
         XmlInputStream in = new XmlInputStream(client.getSocket().getInputStream());
 
@@ -129,8 +130,19 @@ public class Game {
                 this.setColor(client.getColor());
             }});
 
-            ChessMessage message = in.readChessMessage();
-            if(message.getMessageType().equals(MessageType.MOVE)){
+            FutureTask<ChessMessage> messageFutureTask = new FutureTask<>(in::readChessMessage);
+            messageFutureTask.run();
+            ChessMessage message = null;
+            try {
+                message = messageFutureTask.get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+            }
+
+            if(message == null){
+                out.write(createAcceptMessage(client, false, Errortype.TIMEOUT));
+                sendDissconect(client);
+            }else if(message.getMessageType().equals(MessageType.MOVE)){
                 try {
                     b.makeMove(message.getMove());
                     out.write(createAcceptMessage(client, true, Errortype.NOERROR));
@@ -144,7 +156,25 @@ public class Game {
         }while (true);
     }
 
-    public ChessMessage createAcceptMessage(Client c, boolean accept, Errortype errortype){
+    private void sendDissconect(Client failure){
+        for (Client value : clients.values()) {
+            try {
+                XmlOutputStream out = new XmlOutputStream(value.getSocket().getOutputStream());
+                out.write(new ChessMessage(){{
+                    this.setDisconnect(new DisconnectMessage(){{
+                        this.setName(failure.getName() + " has not respond");
+                        this.setErrortypeCode(Errortype.ERROR);
+                    }});
+                    this.setColor(value.getColor());
+                    this.setMessageType(MessageType.DISCONNECT);
+                }});
+            } catch (IOException ignore) {
+            }
+        }
+        System.exit(0);
+    }
+
+    private ChessMessage createAcceptMessage(Client c, boolean accept, Errortype errortype){
         ChessMessage message = new ChessMessage();
         message.setColor(c.getColor());
         message.setMessageType(MessageType.ACCEPT);
