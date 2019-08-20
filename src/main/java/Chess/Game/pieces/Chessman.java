@@ -48,12 +48,10 @@ public abstract class Chessman {
         }else{
             for (Chessman chessman : chessmanList) {
                 for (Position pos : positions) {
-                    if (chessman.getMoves(b).contains(pos) || chessman.getPosition() == pos) {
+                    if (chessman.getMoves(b).contains(pos) || chessman.getPosition().equals(pos)) {
                         Board fake = new Board(b);
 
-                        if(fake.getChessmanByPosition(pos) != null){
-                            fake.getChessmanList(null).remove(chessman);
-                        }
+                        fake.justRemove(pos);
                         fake.getChessmanByPosition(this.position).setPosition(pos);
 
 

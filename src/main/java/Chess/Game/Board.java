@@ -127,6 +127,11 @@ public class Board {
         return inChess;
     }
 
+    public void justRemove(Position pos){
+        if(this.getChessmanByPosition(pos) != null)
+            chessmanList.remove(this.getChessmanByPosition(pos));
+    }
+
     public boolean isWin(){
         List<Chessman> inChess = inChess();
         Logger.info("WIN:", inChess.size());
@@ -143,14 +148,14 @@ public class Board {
         return false;
     }
 
-    public void makeMove(MoveMessage message) throws Throwable {
+    public void makeMove(MoveMessage message) throws WrongMoveException {
         if(message.getRochade() != null){
             if(inChess().size() > 0){
                 throw new WrongMoveException();
             }
 
             if(getChessmanList(currentPlayer).stream().filter(chessman -> chessman.getType().equals(Chessman.ChessmanType.KING))
-                    .findFirst().orElseThrow((Supplier<Throwable>) WrongMoveException::new).getMoves() > 0){
+                    .findFirst().orElseThrow(WrongMoveException::new).getMoves() > 0){
                 throw new WrongMoveException();
             }
 

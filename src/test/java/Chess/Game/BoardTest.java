@@ -23,12 +23,10 @@ class BoardTest {
         } catch (WrongNotationException e) {
             e.printStackTrace();
         }
-        Logger.testcase = true;
     }
 
     @AfterEach
     void tearDown() {
-        Logger.testcase = false;
     }
 
     @Test
@@ -117,5 +115,22 @@ class BoardTest {
         assertEquals(COLOR.WHITE, b.getChessmanByPosition(new Position(5,7)).getColor());
         assertEquals(COLOR.WHITE, b.getChessmanByPosition(new Position(6,7)).getColor());
         assertEquals(COLOR.WHITE, b.getChessmanByPosition(new Position(7,7)).getColor());
+    }
+
+    @Test
+    void test(){
+        try {
+            Board b = new Board("8/8/8/8/8/3b4/2P5/5K2 w - - 0 1");
+
+            b.printBoard();
+
+            System.out.println(b.inChess());
+
+            System.out.println(b.getChessmanByPosition(new Position(2,6)).getMoves(b));
+            System.out.println(b.getChessmanByPosition(new Position(2,6)).getChessMoves(b, b.inChess()));
+
+        } catch (WrongNotationException e) {
+            e.printStackTrace();
+        }
     }
 }
