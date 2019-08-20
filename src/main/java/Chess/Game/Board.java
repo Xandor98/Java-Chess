@@ -417,7 +417,11 @@ public class Board {
                     chessmanList.remove(chessman);
                     Pair<COLOR, Chessman.ChessmanType> tmp = Parser.parseChessman(message.getNewFigure().charAt(0));
                     if (tmp != null) {
+                        if(!tmp.getLeft().equals(canMakeWish)){
+                            throw new IllegalArgumentException();
+                        }
                         chessmanList.add(Parser.getChessman(tmp.getRight(), chessman.getColor(), chessman.getPosition()));
+                        canMakeWish = null;
                     } else {
                         throw new IllegalArgumentException();
                     }

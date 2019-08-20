@@ -25,6 +25,12 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="WishFigureType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[rnbqbnrRNBQBNR]"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:simpleType name="Errortype">
         <xs:restriction base="xs:string">
             <xs:enumeration value="NOERROR" />
@@ -97,7 +103,7 @@
 
     <xs:complexType name="WishMessage">
         <xs:sequence>
-            <xs:element name="newFigure" type="FigureType"/>
+            <xs:element name="newFigure" type="WishFigureType"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -112,7 +118,6 @@
     <xs:complexType name="LoginMessage">
         <xs:sequence>
             <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" />
-            <xs:element name="color" type="COLOR" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
 

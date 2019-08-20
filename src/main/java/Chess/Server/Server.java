@@ -127,7 +127,7 @@ public class Server {
                 ChessMessage message = in.readChessMessage();
                 if(message.getLogin() != null){
                     LoginMessage loginMessage = message.getLogin();
-                    COLOR color = loginMessage.getColor();
+                    COLOR color = getRandomColor();
 
                     if(game.getFreeColor() != null){
                         color = game.getFreeColor();

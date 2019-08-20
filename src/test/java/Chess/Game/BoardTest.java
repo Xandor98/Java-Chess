@@ -122,8 +122,6 @@ class BoardTest {
         try {
             Board b = new Board("8/8/8/8/8/3b4/2P5/5K2 w - - 0 1");
 
-            b.printBoard();
-
             assertEquals(1, b.inChess().size());
 
             assertEquals(3, b.getChessmanByPosition(new Position(2,6)).getMoves(b).size());
