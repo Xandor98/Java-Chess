@@ -32,21 +32,30 @@ public abstract class Chessman {
         List<Position> ret = new ArrayList<>();
 
         if(this instanceof King){
-            return positions;
-        }else {
+            for (Position position1 : positions) {
+                Board fake = new Board(b);
+
+                if(fake.getChessmanByPosition(position1) != null){
+                    fake.getChessmanList(null).remove(fake.getChessmanByPosition(position1));
+                }
+                fake.getChessmanByPosition(this.position).setPosition(position1);
+
+
+                if (fake.inChess().size() == 0) {
+                    ret.add(position1);
+                }
+            }
+        }else{
             for (Chessman chessman : chessmanList) {
                 for (Position pos : positions) {
-                    if (chessman.getMoves(b).contains(pos)) {
+                    if (chessman.getMoves(b).contains(pos) || chessman.getPosition() == pos) {
                         Board fake = new Board(b);
 
-                        try {
-                            fake.makeMove(new MoveMessage() {{
-                                this.setFrom(position.toString());
-                                this.setTo(pos.toString());
-                            }});
-                        } catch (Throwable throwable) {
-                            continue;
+                        if(fake.getChessmanByPosition(pos) != null){
+                            fake.getChessmanList(null).remove(chessman);
                         }
+                        fake.getChessmanByPosition(this.position).setPosition(pos);
+
 
                         if (fake.inChess().size() == 0) {
                             ret.add(pos);
@@ -54,8 +63,8 @@ public abstract class Chessman {
                     }
                 }
             }
-        }
 
+        }
         return ret;
     }
 

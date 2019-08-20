@@ -18,14 +18,16 @@ public class King extends Chessman {
     public List<Position> getMoves(Board b) {
         List<Position> positions = new ArrayList<>();
 
-        positions.add(this.getPosition().add(1,-1));
-        positions.add(this.getPosition().add(1,0));
-        positions.add(this.getPosition().add(1,1));
-        positions.add(this.getPosition().add(0,1));
-        positions.add(this.getPosition().add(-1,1));
-        positions.add(this.getPosition().add(-1,0));
-        positions.add(this.getPosition().add(-1,-1));
-        positions.add(this.getPosition().add(0,-1));
+        Position currPos = this.getPosition();
+
+        positions.add(new Position(currPos.getX() + 1, currPos.getY() - 1));
+        positions.add(new Position(currPos.getX() + 1, currPos.getY()));
+        positions.add(new Position(currPos.getX() + 1, currPos.getY() + 1));
+        positions.add(new Position(currPos.getX(), currPos.getY() + 1));
+        positions.add(new Position(currPos.getX() - 1, currPos.getY() + 1));
+        positions.add(new Position(currPos.getX() - 1, currPos.getY()));
+        positions.add(new Position(currPos.getX() - 1, currPos.getY() - 1));
+        positions.add(new Position(currPos.getX(), currPos.getY() - 1));
 
         for (Position position : new ArrayList<>(positions)) {
             Chessman chessman;
@@ -39,17 +41,42 @@ public class King extends Chessman {
 
                 List<Position> kingPos = new ArrayList<>();
 
-                kingPos.add(chessman.getPosition().add(1,-1));
-                kingPos.add(chessman.getPosition().add(1,0));
-                kingPos.add(chessman.getPosition().add(1,1));
-                kingPos.add(chessman.getPosition().add(0,1));
-                kingPos.add(chessman.getPosition().add(-1,1));
-                kingPos.add(chessman.getPosition().add(-1,0));
-                kingPos.add(chessman.getPosition().add(-1,-1));
-                kingPos.add(chessman.getPosition().add(0,-1));
+                Position currentPos = chessman.getPosition();
+
+                kingPos.add(new Position(currentPos.getX() + 1, currentPos.getY() - 1));
+                kingPos.add(new Position(currentPos.getX() + 1, currentPos.getY()));
+                kingPos.add(new Position(currentPos.getX() + 1, currentPos.getY() + 1));
+                kingPos.add(new Position(currentPos.getX(), currentPos.getY() + 1));
+                kingPos.add(new Position(currentPos.getX() - 1, currentPos.getY() + 1));
+                kingPos.add(new Position(currentPos.getX() - 1, currentPos.getY()));
+                kingPos.add(new Position(currentPos.getX() - 1, currentPos.getY() - 1));
+                kingPos.add(new Position(currentPos.getX(), currentPos.getY() - 1));
 
                 for (Position position : new ArrayList<>(positions)) {
                     if(kingPos.contains(position)){
+                        positions.remove(position);
+                    }
+                }
+
+                continue;
+            }
+            if(chessman instanceof Pawn){
+
+                List<Position> pawnPos = new ArrayList<>();
+
+                switch (chessman.getColor()){
+                    case BLACK:
+                        pawnPos.add(new Position(chessman.getPosition().getX() + 1, chessman.getPosition().getY() + 1));
+                        pawnPos.add(new Position(chessman.getPosition().getX() - 1, chessman.getPosition().getY() + 1));
+                        break;
+                    case WHITE:
+                        pawnPos.add(new Position(chessman.getPosition().getX() + 1, chessman.getPosition().getY() - 1));
+                        pawnPos.add(new Position(chessman.getPosition().getX() - 1, chessman.getPosition().getY() - 1));
+                        break;
+                }
+
+                for (Position position : new ArrayList<>(positions)) {
+                    if(pawnPos.contains(position)){
                         positions.remove(position);
                     }
                 }

@@ -39,7 +39,10 @@ public class Board {
     }
 
     public Board(Board b){
-        this.chessmanList = new ArrayList<>(b.chessmanList);
+        this.chessmanList = new ArrayList<>();
+        for (Chessman chessman : b.getChessmanList(null)) {
+            this.chessmanList.add(Parser.getChessman(chessman.getType(), chessman.getColor(), chessman.getPosition()));
+        }
         this.currentPlayer = b.currentPlayer;
 
         this.enPassent = b.enPassent;
@@ -102,8 +105,14 @@ public class Board {
     }
 
     public List<Chessman> inChess(){
-        Chessman king = chessmanList.stream().filter(chessman -> chessman.getType().equals(Chessman.ChessmanType.KING)
-                && chessman.getColor().equals(currentPlayer)).findAny().orElse(null);
+        Chessman king = null;
+
+        for (Chessman chessman : chessmanList) {
+            if(chessman instanceof King && chessman.getColor() == currentPlayer){
+                king = chessman;
+                break;
+            }
+        }
 
         if(king == null){
             throw  new IllegalStateException("NO KING FOUND");
@@ -120,13 +129,16 @@ public class Board {
 
     public boolean isWin(){
         List<Chessman> inChess = inChess();
+        Logger.info("WIN:", inChess.size());
+        boolean win = true;
         if(inChess.size() > 0){
             for (Chessman chessman : getChessmanList(currentPlayer)) {
                 if(chessman.getChessMoves(this, inChess).size() > 0){
-                    return false;
+                    win = false;
                 }
             }
-            return true;
+            Logger.info("WIN:", win);
+            return win;
         }
         return false;
     }
@@ -304,8 +316,12 @@ public class Board {
 
         List<Position> positions;
 
-        if(inChess().size() > 0){
-            positions = men.getChessMoves(this, inChess());
+        List<Chessman> chessmen = inChess();
+
+        System.out.println(chessmen.size());
+
+        if(chessmen.size() > 0){
+            positions = men.getChessMoves(this, chessmen);
         }else {
             positions = men.getMoves(this);
         }
@@ -314,10 +330,10 @@ public class Board {
             if(dest.equals(enPassent)){
                 switch (currentPlayer){
                     case WHITE:
-                        chessmanList.remove(getChessmanByPosition(enPassent.add(0, -1)));
+                        chessmanList.remove(getChessmanByPosition(new Position(enPassent.getX(), enPassent.getY() - 1)));
                         break;
                     case BLACK:
-                        chessmanList.remove(getChessmanByPosition(enPassent.add(0, 1)));
+                        chessmanList.remove(getChessmanByPosition(new Position(enPassent.getX(), enPassent.getY() + 1)));
                         break;
                 }
                 men.setPosition(enPassent);
@@ -482,7 +498,7 @@ public class Board {
     }
 
     public List<Chessman> getChessmanList(COLOR color){
-        if(color == null) return new ArrayList<>(chessmanList);
+        if(color == null) return chessmanList;
         return chessmanList.stream().filter(chessman -> chessman.getColor() == color).collect(Collectors.toList());
     }
 

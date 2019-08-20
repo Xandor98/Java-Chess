@@ -26,16 +26,6 @@ public class Position {
         this.y = -1;
     }
 
-    public Position add(Position p){
-        this.x += p.getX();
-        this.y += p.getY();
-        return this;
-    }
-
-    public Position add(int x, int y){
-        return add(new Position(x,y));
-    }
-
     public int getX() {
         return x;
     }

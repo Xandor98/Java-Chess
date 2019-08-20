@@ -17,14 +17,16 @@ public class Knight extends Chessman {
     public List<Position> getMoves(Board b) {
         List<Position> positions = new ArrayList<>();
 
-        positions.add(this.getPosition().add(2, 1));
-        positions.add(this.getPosition().add(2, -1));
-        positions.add(this.getPosition().add(-2, 1));
-        positions.add(this.getPosition().add(-2, -1));
-        positions.add(this.getPosition().add(1, 2));
-        positions.add(this.getPosition().add(-1, 2));
-        positions.add(this.getPosition().add(1, -2));
-        positions.add(this.getPosition().add(-1, -2));
+        Position currPos = this.getPosition();
+
+        positions.add(new Position(currPos.getX() + 2, currPos.getY() + 1));
+        positions.add(new Position(currPos.getX() + 2, currPos.getY() - 1));
+        positions.add(new Position(currPos.getX() - 2, currPos.getY() + 1));
+        positions.add(new Position(currPos.getX() - 2, currPos.getY() - 1));
+        positions.add(new Position(currPos.getX() + 1, currPos.getY() + 2));
+        positions.add(new Position(currPos.getX() - 1, currPos.getY() + 2));
+        positions.add(new Position(currPos.getX() + 1, currPos.getY() - 2));
+        positions.add(new Position(currPos.getX() - 1, currPos.getY() - 2));
 
         for (Position position : new ArrayList<>(positions)) {
             Chessman chessman;
