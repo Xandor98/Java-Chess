@@ -323,8 +323,6 @@ public class Board {
 
         List<Chessman> chessmen = inChess();
 
-        System.out.println(chessmen.size());
-
         if(chessmen.size() > 0){
             positions = men.getChessMoves(this, chessmen);
         }else {
@@ -402,9 +400,6 @@ public class Board {
             }
             canMakeWish = null;
         }
-
-        System.out.println(enPassent);
-        System.out.println(canMakeWish);
 
         currentPlayer = currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK;
         round++;
