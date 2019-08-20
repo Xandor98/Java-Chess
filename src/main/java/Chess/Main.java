@@ -3,6 +3,7 @@ package Chess;
 import Chess.Exceptions.WrongNotationException;
 import Chess.Game.Board;
 import Chess.Game.Position;
+import Chess.Server.Server;
 import Chess.misc.Settings;
 import org.apache.commons.cli.*;
 
@@ -35,21 +36,7 @@ public class Main {
     public static void main(String[] args) throws WrongNotationException {
         parsArgs(args);
 
-        try {
-            Board b = new Board("8/8/8/8/8/3b4/2P5/5K2 w - - 0 1");
-
-            b.printBoard();
-
-            System.out.println(b.inChess());
-
-            System.out.println(b.getChessmanByPosition(new Position(2,6)).getMoves(b));
-            System.out.println(b.getChessmanByPosition(new Position(2,6)).getChessMoves(b, b.inChess()));
-
-        } catch (WrongNotationException e) {
-            e.printStackTrace();
-        }
-
-        //Server sv = new Server();
-        //sv.start();
+        Server sv = new Server();
+        sv.start();
     }
 }

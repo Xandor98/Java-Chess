@@ -124,10 +124,10 @@ class BoardTest {
 
             b.printBoard();
 
-            System.out.println(b.inChess());
+            assertEquals(1, b.inChess().size());
 
-            System.out.println(b.getChessmanByPosition(new Position(2,6)).getMoves(b));
-            System.out.println(b.getChessmanByPosition(new Position(2,6)).getChessMoves(b, b.inChess()));
+            assertEquals(3, b.getChessmanByPosition(new Position(2,6)).getMoves(b).size());
+            assertEquals(1, b.getChessmanByPosition(new Position(2,6)).getChessMoves(b, b.inChess()).size());
 
         } catch (WrongNotationException e) {
             e.printStackTrace();
