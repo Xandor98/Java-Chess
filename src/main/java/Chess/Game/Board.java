@@ -233,10 +233,6 @@ public class Board {
                     }
 
                     if(getChessmanByPosition(new Position(5, 0)) == null && getChessmanByPosition(new Position(6, 0)) == null){
-                        if(currentPlayer != COLOR.WHITE){
-                            throw new WrongMoveException();
-                        }
-
                         if(getChessmanByPosition(new Position(5, 0)) == null && getChessmanByPosition(new Position(6, 0)) == null){
                             for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
                                 if(chessman.getMoves(this).contains(new Position(5,0)) ||
