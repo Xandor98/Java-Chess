@@ -4,21 +4,27 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "verify",
+            "label": "mvn: verify",
             "type": "shell",
             "command": "mvn -B verify",
             "group": "build"
         },
         {
-            "label": "test",
+            "label": "mvn: test",
             "type": "shell",
             "command": "mvn -B test",
             "group": "test"
         },
         {
-            "label": "run",
+            "label": "mvn: run",
             "type": "shell",
-            "command": "mvn exec:java",
+            "command": "mvn -B exec:java",
+            "group": "build"
+        },
+        {
+            "label": "mvn: install",
+            "type": "shell",
+            "command": "mvn -B clean install",
             "group": "build"
         }
     ]

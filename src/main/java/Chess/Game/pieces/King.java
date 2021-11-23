@@ -2,7 +2,6 @@ package Chess.Game.pieces;
 
 import Chess.Game.Board;
 import Chess.Game.Position;
-import Chess.generated.AcceptMessage;
 import Chess.generated.COLOR;
 
 import java.util.ArrayList;

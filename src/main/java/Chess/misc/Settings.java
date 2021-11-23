@@ -12,6 +12,7 @@ public class Settings {
     public static String SSL_CERT_STORE_PASSWD;
 
     public static boolean CONSOLE_START;
+    public static int TIMEOUT_TIME;
 
     public static void load(String path){
         Properties props = new Properties();
@@ -31,5 +32,6 @@ public class Settings {
         SSL_CERT_STORE_PASSWD = props.getProperty("SSL_CER_STORE_PASSWD", "");
 
         CONSOLE_START = Boolean.parseBoolean(props.getProperty("CONSOLE_START", "true"));
+        TIMEOUT_TIME = Integer.parseInt(props.getProperty("TIMEOUT_TIME", "10"));
     }
 }

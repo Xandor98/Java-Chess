@@ -5,8 +5,8 @@ import Chess.Exceptions.WrongNotationException;
 import Chess.Game.pieces.Chessman;
 import Chess.Game.pieces.King;
 import Chess.Game.pieces.Pawn;
-import Chess.Game.pieces.Rook;
 import Chess.generated.COLOR;
+import Chess.generated.ChessMessage;
 import Chess.generated.MoveMessage;
 import Chess.generated.WishMessage;
 import Chess.misc.Logger;
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Board {
@@ -59,12 +58,14 @@ public class Board {
         chessmanList = new ArrayList<>();
         String[] FENargs = FEN.split(" ");
 
+        //Current Player
         if(FENargs[1].equals("w")){
             currentPlayer = COLOR.WHITE;
         }else {
             currentPlayer = COLOR.BLACK;
         }
 
+        //Chessborad
         int currentY = 0;
         for(String s : FENargs[0].split("/")){
             int currentX = 0;
@@ -81,9 +82,11 @@ public class Board {
             currentY++;
         }
 
+        //HalfMoveClock and Round Clock
         this.halfMoveClock = Integer.parseInt(FENargs[4]);
         this.round = Integer.parseInt(FENargs[5]);
 
+        //Rochade
         this.rochade = new HashMap<>();
         rochade.put(COLOR.BLACK, true);
         rochade.put(COLOR.WHITE, true);
@@ -104,7 +107,11 @@ public class Board {
         }
     }
 
-    public List<Chessman> inChess(){
+    /**
+     * This Method Checks if the current Player is in Check and returns all ChessFigures that causes the Check
+     * @return Chess Figures that causes the Check of the King
+     */
+    public List<Chessman> inCheck(){
         Chessman king = null;
 
         for (Chessman chessman : chessmanList) {
@@ -118,13 +125,13 @@ public class Board {
             throw  new IllegalStateException("NO KING FOUND");
         }
 
-        List<Chessman> inChess = new ArrayList<>();
+        List<Chessman> inCheck = new ArrayList<>();
         for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
             if(chessman.getMoves(this).contains(king.getPosition())){
-                inChess.add(chessman);
+                inCheck.add(chessman);
             }
         }
-        return inChess;
+        return inCheck;
     }
 
     public void justRemove(Position pos){
@@ -133,162 +140,26 @@ public class Board {
     }
 
     public boolean isWin(){
-        List<Chessman> inChess = inChess();
-        Logger.info("WIN:", inChess.size());
+        List<Chessman> inCheck = inCheck();
         boolean win = true;
-        if(inChess.size() > 0){
+
+        if(inCheck.size() > 0){
             for (Chessman chessman : getChessmanList(currentPlayer)) {
-                if(chessman.getChessMoves(this, inChess).size() > 0){
+                if(chessman.getCheckMoves(this, inCheck).size() > 0){
                     win = false;
                 }
             }
-            Logger.info("WIN:", win);
             return win;
         }
         return false;
     }
 
     public void makeMove(MoveMessage message) throws WrongMoveException {
+        
         if(message.getRochade() != null){
-            if(inChess().size() > 0){
-                throw new WrongMoveException();
-            }
-
-            if(getChessmanList(currentPlayer).stream().filter(chessman -> chessman.getType().equals(Chessman.ChessmanType.KING))
-                    .findFirst().orElseThrow(WrongMoveException::new).getMoves() > 0){
-                throw new WrongMoveException();
-            }
-
-            char rochade = message.getRochade().charAt(0);
-
-
-            switch (rochade){
-                case 'K':
-                    if(currentPlayer != COLOR.WHITE){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(7,7)) == null || getChessmanByPosition(new Position(7,7)).getMoves() > 0 ){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(5, 7)) == null && getChessmanByPosition(new Position(6, 7)) == null){
-                        for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
-                            if(chessman.getMoves(this).contains(new Position(5,7)) ||
-                                    chessman.getMoves(this).contains(new Position(6,7))){
-                                throw new WrongMoveException();
-                            }
-                        }
-                        Chessman king = getChessmanByPosition(new Position(4,7));
-                        king.setPosition(new Position(6,7));
-                        king.setMoves(king.getMoves() + 1);
-
-                        Chessman rook = getChessmanByPosition(new Position(7,7));
-                        rook.setPosition(new Position(5,7));
-                        rook.setMoves(rook.getMoves() + 1);
-
-                        this.rochade.put(currentPlayer, true);
-                    }else{
-                        throw new WrongMoveException();
-                    }
-                    break;
-                case 'Q':
-                    if(currentPlayer != COLOR.WHITE){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(0,7)) == null || getChessmanByPosition(new Position(0,7)).getMoves() > 0 ){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(1, 7)) == null && getChessmanByPosition(new Position(2, 7)) == null && getChessmanByPosition(new Position(3, 7)) == null){
-                        for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
-                            if(chessman.getMoves(this).contains(new Position(1,7)) ||
-                                    chessman.getMoves(this).contains(new Position(2,7)) ||
-                                    chessman.getMoves(this).contains(new Position(3,7))){
-                                throw new WrongMoveException();
-                            }
-                        }
-
-                        Chessman king = getChessmanByPosition(new Position(4,7));
-                        king.setPosition(new Position(2,7));
-                        king.setMoves(king.getMoves() + 1);
-
-                        Chessman rook = getChessmanByPosition(new Position(0,7));
-                        rook.setPosition(new Position(3,7));
-                        rook.setMoves(rook.getMoves() + 1);
-
-                        this.rochade.put(currentPlayer, true);
-                    }else{
-                        throw new WrongMoveException();
-                    }
-                    break;
-                case 'k':
-                    if(currentPlayer != COLOR.BLACK){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(7,0)) == null || getChessmanByPosition(new Position(7,0)).getMoves() > 0 ){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(5, 0)) == null && getChessmanByPosition(new Position(6, 0)) == null){
-                        if(getChessmanByPosition(new Position(5, 0)) == null && getChessmanByPosition(new Position(6, 0)) == null){
-                            for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
-                                if(chessman.getMoves(this).contains(new Position(5,0)) ||
-                                        chessman.getMoves(this).contains(new Position(6,0))){
-                                    throw new WrongMoveException();
-                                }
-                            }
-                            Chessman king = getChessmanByPosition(new Position(4,0));
-                            king.setPosition(new Position(6,0));
-                            king.setMoves(king.getMoves() + 1);
-
-                            Chessman rook = getChessmanByPosition(new Position(7,0));
-                            rook.setPosition(new Position(5,0));
-                            rook.setMoves(rook.getMoves() + 1);
-
-                            this.rochade.put(currentPlayer, true);
-                        }else{
-                            throw new WrongMoveException();
-                        }
-                    }else{
-                        throw new WrongMoveException();
-                    }
-                    break;
-                case 'q':
-                    if(currentPlayer != COLOR.BLACK){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(0,0)) == null || getChessmanByPosition(new Position(0,0)).getMoves() > 0 ){
-                        throw new WrongMoveException();
-                    }
-
-                    if(getChessmanByPosition(new Position(1, 0)) == null && getChessmanByPosition(new Position(2, 0)) == null && getChessmanByPosition(new Position(3, 0)) == null){
-                        for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
-                            if(chessman.getMoves(this).contains(new Position(1,0)) ||
-                                    chessman.getMoves(this).contains(new Position(2,0)) ||
-                                    chessman.getMoves(this).contains(new Position(3,0))){
-                                throw new WrongMoveException();
-                            }
-                        }
-
-                        Chessman king = getChessmanByPosition(new Position(4,0));
-                        king.setPosition(new Position(2,0));
-                        king.setMoves(king.getMoves() + 1);
-
-                        Chessman rook = getChessmanByPosition(new Position(0,0));
-                        rook.setPosition(new Position(3,0));
-                        rook.setMoves(rook.getMoves() + 1);
-
-                        this.rochade.put(currentPlayer, true);
-                    }else{
-                        throw new WrongMoveException();
-                    }
-                    break;
-            }
-            return;
+            //When the Method returns False the Rochhade was an - in the Notaion of the message
+            if (checkRochhade(message)) 
+                return;
         }
 
         Position from = new Position(message.getFrom());
@@ -317,10 +188,10 @@ public class Board {
 
         List<Position> positions;
 
-        List<Chessman> chessmen = inChess();
+        List<Chessman> chessmen = inCheck();
 
         if(chessmen.size() > 0){
-            positions = men.getChessMoves(this, chessmen);
+            positions = men.getCheckMoves(this, chessmen);
         }else {
             positions = men.getMoves(this);
         }
@@ -377,7 +248,7 @@ public class Board {
                 Logger.info("EnPassant:", enPassent.getX() + "|" + enPassent.getY());
             }
             men.setPosition(dest);
-            men.setMoves(men.getMoves() + 1);
+            men.setMoveCounter(men.getMoveCounter() + 1);
 
             if(men instanceof King){
                 this.rochade.put(currentPlayer, true);
@@ -400,6 +271,156 @@ public class Board {
         currentPlayer = currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK;
         round++;
     }
+
+    /**
+     * This Method checks If the rochade Moves are possible
+     * @param message The Move Message from the Client
+     * @throws WrongMoveException When the Move is not Possible
+     * @return If the Rochade is successfull. When False the Rochade was set with an - in the Notation
+     */
+    private boolean checkRochhade(MoveMessage message) throws WrongMoveException{
+        if(inCheck().size() > 0){
+            throw new WrongMoveException();
+        }
+
+        if(getChessmanList(currentPlayer).stream().filter(chessman -> chessman.getType().equals(Chessman.ChessmanType.KING))
+                .findFirst().orElseThrow(WrongMoveException::new).getMoveCounter() > 0){
+            throw new WrongMoveException();
+        }
+
+        char rochade = message.getRochade().charAt(0);
+        
+        switch (rochade){
+            case 'K':
+                if(currentPlayer != COLOR.WHITE){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(7,7)) == null || getChessmanByPosition(new Position(7,7)).getMoveCounter() > 0 ){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(5, 7)) == null && getChessmanByPosition(new Position(6, 7)) == null){
+                    for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
+                        if(chessman.getMoves(this).contains(new Position(5,7)) ||
+                                chessman.getMoves(this).contains(new Position(6,7))){
+                            throw new WrongMoveException();
+                        }
+                    }
+                    Chessman king = getChessmanByPosition(new Position(4,7));
+                    king.setPosition(new Position(6,7));
+                    king.setMoveCounter(king.getMoveCounter() + 1);
+
+                    Chessman rook = getChessmanByPosition(new Position(7,7));
+                    rook.setPosition(new Position(5,7));
+                    rook.setMoveCounter(rook.getMoveCounter() + 1);
+
+                    this.rochade.put(currentPlayer, true);
+                }else{
+                    throw new WrongMoveException();
+                }
+                break;
+            case 'Q':
+                if(currentPlayer != COLOR.WHITE){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(0,7)) == null || getChessmanByPosition(new Position(0,7)).getMoveCounter() > 0 ){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(1, 7)) == null && getChessmanByPosition(new Position(2, 7)) == null && getChessmanByPosition(new Position(3, 7)) == null){
+                    for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
+                        if(chessman.getMoves(this).contains(new Position(1,7)) ||
+                                chessman.getMoves(this).contains(new Position(2,7)) ||
+                                chessman.getMoves(this).contains(new Position(3,7))){
+                            throw new WrongMoveException();
+                        }
+                    }
+
+                    Chessman king = getChessmanByPosition(new Position(4,7));
+                    king.setPosition(new Position(2,7));
+                    king.setMoveCounter(king.getMoveCounter() + 1);
+
+                    Chessman rook = getChessmanByPosition(new Position(0,7));
+                    rook.setPosition(new Position(3,7));
+                    rook.setMoveCounter(rook.getMoveCounter() + 1);
+
+                    this.rochade.put(currentPlayer, true);
+                }else{
+                    throw new WrongMoveException();
+                }
+                break;
+            case 'k':
+                if(currentPlayer != COLOR.BLACK){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(7,0)) == null || getChessmanByPosition(new Position(7,0)).getMoveCounter() > 0 ){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(5, 0)) == null && getChessmanByPosition(new Position(6, 0)) == null){
+                    if(getChessmanByPosition(new Position(5, 0)) == null && getChessmanByPosition(new Position(6, 0)) == null){
+                        for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
+                            if(chessman.getMoves(this).contains(new Position(5,0)) ||
+                                    chessman.getMoves(this).contains(new Position(6,0))){
+                                throw new WrongMoveException();
+                            }
+                        }
+                        Chessman king = getChessmanByPosition(new Position(4,0));
+                        king.setPosition(new Position(6,0));
+                        king.setMoveCounter(king.getMoveCounter() + 1);
+
+                        Chessman rook = getChessmanByPosition(new Position(7,0));
+                        rook.setPosition(new Position(5,0));
+                        rook.setMoveCounter(rook.getMoveCounter() + 1);
+
+                        this.rochade.put(currentPlayer, true);
+                    }else{
+                        throw new WrongMoveException();
+                    }
+                }else{
+                    throw new WrongMoveException();
+                }
+                break;
+            case 'q':
+                if(currentPlayer != COLOR.BLACK){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(0,0)) == null || getChessmanByPosition(new Position(0,0)).getMoveCounter() > 0 ){
+                    throw new WrongMoveException();
+                }
+
+                if(getChessmanByPosition(new Position(1, 0)) == null && getChessmanByPosition(new Position(2, 0)) == null && getChessmanByPosition(new Position(3, 0)) == null){
+                    for (Chessman chessman : getChessmanList(currentPlayer.equals(COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK)) {
+                        if(chessman.getMoves(this).contains(new Position(1,0)) ||
+                                chessman.getMoves(this).contains(new Position(2,0)) ||
+                                chessman.getMoves(this).contains(new Position(3,0))){
+                            throw new WrongMoveException();
+                        }
+                    }
+
+                    Chessman king = getChessmanByPosition(new Position(4,0));
+                    king.setPosition(new Position(2,0));
+                    king.setMoveCounter(king.getMoveCounter() + 1);
+
+                    Chessman rook = getChessmanByPosition(new Position(0,0));
+                    rook.setPosition(new Position(3,0));
+                    rook.setMoveCounter(rook.getMoveCounter() + 1);
+
+                    this.rochade.put(currentPlayer, true);
+                }else{
+                    throw new WrongMoveException();
+                }
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    } 
 
     public void makeWish(WishMessage message){
         for (Chessman chessman : new ArrayList<>(chessmanList)) {
@@ -456,13 +477,13 @@ public class Board {
         String rochade = "";
         if(!this.rochade.get(COLOR.WHITE)){
             try {
-                if (getChessmanByPosition(new Position(7, 7)) != null && getChessmanByPosition(new Position(7, 7)).getMoves() == 0) {
+                if (getChessmanByPosition(new Position(7, 7)) != null && getChessmanByPosition(new Position(7, 7)).getMoveCounter() == 0) {
                     rochade += "K";
                 }
             }catch (NullPointerException ignored){}
 
             try {
-                if (getChessmanByPosition(new Position(7, 7)) != null && getChessmanByPosition(new Position(0, 7)).getMoves() == 0) {
+                if (getChessmanByPosition(new Position(7, 7)) != null && getChessmanByPosition(new Position(0, 7)).getMoveCounter() == 0) {
                     rochade += "Q";
                 }
             }catch (NullPointerException ignored){}
@@ -470,13 +491,13 @@ public class Board {
 
         if(!this.rochade.get(COLOR.BLACK)){
             try{
-                if(getChessmanByPosition(new Position(7,0)) != null && getChessmanByPosition(new Position(7,0)).getMoves() == 0 ){
+                if(getChessmanByPosition(new Position(7,0)) != null && getChessmanByPosition(new Position(7,0)).getMoveCounter() == 0 ){
                     rochade += "k";
                 }
             }catch (NullPointerException ignored){}
 
             try{
-                if(getChessmanByPosition(new Position(0,0)) != null && getChessmanByPosition(new Position(0,0)).getMoves() == 0 ){
+                if(getChessmanByPosition(new Position(0,0)) != null && getChessmanByPosition(new Position(0,0)).getMoveCounter() == 0 ){
                     rochade += "q";
                 }
             }catch (NullPointerException ignored){}
@@ -505,6 +526,10 @@ public class Board {
     public Chessman getChessmanByPosition(Position p){
         Optional<Chessman> opt = chessmanList.stream().filter(chessman -> chessman.getPosition().equals(p)).findFirst();
         return opt.orElse(null);
+    }
+
+    public int getHalfMoveClock() {
+        return halfMoveClock;
     }
 
     public void printBoard() {

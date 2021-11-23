@@ -7,6 +7,7 @@ import Chess.misc.Settings;
 import Chess.networking.XmlInputStream;
 import Chess.networking.XmlOutputStream;
 
+import javax.lang.model.type.ErrorType;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.net.*;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -116,47 +118,66 @@ public class Server {
         }
     }
 
+    private void sendErrorMessage(XmlOutputStream outStream, Errortype error) throws IOException{
+        ChessMessage falseMess = new ChessMessage(){{
+            this.setAccept(new AcceptMessage(){{
+                this.setAccept(false);
+                this.setErrortypeCode(error);
+            }});
+            this.setMessageType(MessageType.ACCEPT);
+            this.setColor(null);
+            this.setPlayerID("");
+        }};
+        outStream.write(falseMess);
+    }
+
     private void firstConntact(Socket client){
         boolean truth = false;
 
+        int tries = 0;
         try {
             XmlInputStream in = new XmlInputStream(client.getInputStream());
             XmlOutputStream out = new XmlOutputStream(client.getOutputStream());
 
             while (!truth){
                 ChessMessage message = in.readChessMessage();
+
+                if(message.getMessageType() != MessageType.LOGIN){
+                    final int currTries = tries;
+                    sendErrorMessage(out, (currTries + 1 >= 3) ? Errortype.TOO_MANY_TRIES : Errortype.AWAIT_LOGIN);
+                    tries++;
+                    continue;
+                }
+
                 if(message.getLogin() != null){
                     LoginMessage loginMessage = message.getLogin();
                     COLOR color = getRandomColor();
+                    UUID playerID = UUID.randomUUID();
 
                     if(game.getFreeColor() != null){
                         color = game.getFreeColor();
                     }
 
-                    Client c = new Client(color, client, loginMessage.getName());
+                    Client c = new Client(color, client, loginMessage.getName(), playerID);
 
                     final COLOR Fcolor = color;
+                    final UUID FplayerID = playerID;
                     ChessMessage trueMess = new ChessMessage(){{
                         this.setLoginReply(new LoginReplyMessage(){{
                             this.setColor(Fcolor);
                         }});
                         this.setMessageType(MessageType.LOGIN_REPLY);
                         this.setColor(Fcolor);
+                        this.setPlayerID(FplayerID.toString());
                     }};
                     out.write(trueMess);
 
                     game.addClient(c);
                     truth = true;
                 }else{
-                    ChessMessage falseMess = new ChessMessage(){{
-                        this.setAccept(new AcceptMessage(){{
-                            this.setAccept(false);
-                            this.setErrortypeCode(Errortype.AWAIT_LOGIN);
-                        }});
-                        this.setMessageType(MessageType.ACCEPT);
-                        this.setColor(null);
-                    }};
-                    out.write(falseMess);
+                    final int currTries = tries;
+                    sendErrorMessage(out, (currTries + 1 >= 3) ? Errortype.TOO_MANY_TRIES : Errortype.AWAIT_LOGIN);
+                    tries++;
                 }
             }
         } catch (IOException | JAXBException e) {
