@@ -3,7 +3,6 @@ package Chess.Game;
 import Chess.Exceptions.WrongNotationException;
 import Chess.Game.pieces.Chessman;
 import Chess.generated.COLOR;
-import Chess.misc.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

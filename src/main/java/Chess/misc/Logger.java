@@ -1,7 +1,5 @@
 package Chess.misc;
 
-import java.util.Arrays;
-
 public class Logger {
 
     private static final LogLvl DEFAULT = LogLvl.DEBUG;

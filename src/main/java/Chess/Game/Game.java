@@ -3,7 +3,6 @@ package Chess.Game;
 import Chess.Exceptions.WrongNotationException;
 import Chess.Server.Client;
 import Chess.generated.*;
-import Chess.misc.Logger;
 import Chess.networking.XmlInputStream;
 import Chess.networking.XmlOutputStream;
 

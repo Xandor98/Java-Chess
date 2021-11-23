@@ -5,7 +5,6 @@ import Chess.Exceptions.WrongNotationException;
 import Chess.Game.pieces.Chessman;
 import Chess.Game.pieces.King;
 import Chess.Game.pieces.Pawn;
-import Chess.Game.pieces.Rook;
 import Chess.generated.COLOR;
 import Chess.generated.MoveMessage;
 import Chess.generated.WishMessage;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Board {
@@ -160,8 +158,7 @@ public class Board {
             }
 
             char rochade = message.getRochade().charAt(0);
-
-
+            
             switch (rochade){
                 case 'K':
                     if(currentPlayer != COLOR.WHITE){

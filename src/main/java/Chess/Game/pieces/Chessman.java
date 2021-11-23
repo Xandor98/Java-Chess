@@ -1,10 +1,8 @@
 package Chess.Game.pieces;
 
-import Chess.Exceptions.WrongMoveException;
 import Chess.Game.Board;
 import Chess.Game.Position;
 import Chess.generated.COLOR;
-import Chess.generated.MoveMessage;
 
 import java.util.ArrayList;
 import java.util.List;

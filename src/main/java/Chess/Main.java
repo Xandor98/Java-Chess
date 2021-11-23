@@ -1,8 +1,6 @@
 package Chess;
 
 import Chess.Exceptions.WrongNotationException;
-import Chess.Game.Board;
-import Chess.Game.Position;
 import Chess.Server.Server;
 import Chess.misc.Settings;
 import org.apache.commons.cli.*;
