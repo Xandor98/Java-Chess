@@ -4,9 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>Chess</groupId>
-    <artifactId>Chess</artifactId>
+    <groupId>Java-Chess</groupId>
+    <artifactId>Java-Chess-Server</artifactId>
     <version>0.8</version>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Xandor98/Java-Chess</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <java.version>11</java.version>
