@@ -1,8 +1,10 @@
 package Chess.Game;
 
+import Chess.Exceptions.WrongMoveException;
 import Chess.Exceptions.WrongNotationException;
 import Chess.Server.Client;
 import Chess.generated.*;
+import Chess.misc.Settings;
 import Chess.networking.XmlInputStream;
 import Chess.networking.XmlOutputStream;
 
@@ -20,14 +22,11 @@ public class Game {
     }
 
     public void addClient(Client c){
-        if(clients.values().size() == 0){
+        if (!clients.containsKey(c.getColor()))
             clients.put(c.getColor(), c);
-        }else if(clients.values().size() < 2){
-            if(!clients.containsKey(c.getColor())){
-                clients.put(c.getColor(), c);
-                startGame();
-            }
-        }
+
+        if(clients.values().size() == 2)
+            startGame();
     }
 
     private void startGame(){
@@ -50,6 +49,10 @@ public class Game {
                     makeWish(clients.get(current), b);
                 }
 
+                if (b.getHalfMoveClock() == 50){
+                    break;
+                }
+
                 b.printBoard();
             } catch (IOException | UnmarshalException e) {
                 e.printStackTrace();
@@ -65,14 +68,15 @@ public class Game {
                     Board finalB = b;
                     ChessMessage winMessage = new ChessMessage(){{
                         this.setWin(new WinMessage(){{
-                            this.setWinner(Fwinner);
+                            this.setWinner((finalB.getHalfMoveClock() == 50) ? null : Fwinner);
                             this.setBoard(new BoardData(){{
                                 this.setFEN(finalB.getFEN());
                             }});
-                            this.setRemis(false);
+                            this.setRemis(finalB.getHalfMoveClock() == 50);
                         }});
                        this.setMessageType(MessageType.WIN);
                        this.setColor(value.getColor());
+                       this.setPlayerID(value.getPlayerID().toString());
                     }};
 
                     out.write(winMessage);
@@ -95,10 +99,13 @@ public class Game {
                 }});
                 this.setMessageType(MessageType.MAKE_WISH);
                 this.setColor(client.getColor());
+                this.setPlayerID(client.getPlayerID().toString());
             }});
 
             ChessMessage message = in.readChessMessage();
-            if(message.getMessageType().equals(MessageType.WISH)){
+            if (!message.getPlayerID().equals(client.getPlayerID().toString())){
+                out.write(createAcceptMessage(client, false, Errortype.WRONG_PLAYERID));
+            }else if(message.getMessageType().equals(MessageType.WISH)){
                 try {
                     b.makeWish(message.getWish());
 
@@ -127,13 +134,14 @@ public class Game {
                 }});
                 this.setMessageType(MessageType.AWAIT_MOVE);
                 this.setColor(client.getColor());
+                this.setPlayerID(client.getPlayerID().toString());
             }});
 
             FutureTask<ChessMessage> messageFutureTask = new FutureTask<>(in::readChessMessage);
             messageFutureTask.run();
             ChessMessage message = null;
             try {
-                message = messageFutureTask.get(10, TimeUnit.SECONDS);
+                message = messageFutureTask.get(Settings.TIMEOUT_TIME, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
@@ -141,12 +149,14 @@ public class Game {
             if(message == null){
                 out.write(createAcceptMessage(client, false, Errortype.TIMEOUT));
                 sendDissconect(client);
+            }else if (!message.getPlayerID().equals(client.getPlayerID().toString())){
+                out.write(createAcceptMessage(client, false, Errortype.WRONG_PLAYERID));
             }else if(message.getMessageType().equals(MessageType.MOVE)){
                 try {
                     b.makeMove(message.getMove());
                     out.write(createAcceptMessage(client, true, Errortype.NOERROR));
                     break;
-                } catch (Throwable throwable) {
+                } catch (WrongMoveException wrongMove) {
                     out.write(createAcceptMessage(client, false, Errortype.ILLEGAL_MOVE));
                 }
             }else{
@@ -166,6 +176,7 @@ public class Game {
                     }});
                     this.setColor(value.getColor());
                     this.setMessageType(MessageType.DISCONNECT);
+                    this.setPlayerID(value.getPlayerID().toString());
                 }});
             } catch (IOException ignore) {
             }
@@ -177,6 +188,7 @@ public class Game {
         ChessMessage message = new ChessMessage();
         message.setColor(c.getColor());
         message.setMessageType(MessageType.ACCEPT);
+        message.setPlayerID(c.getPlayerID().toString());
 
         AcceptMessage acceptMessage = new AcceptMessage();
 

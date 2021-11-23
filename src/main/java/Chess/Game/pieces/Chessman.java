@@ -14,7 +14,7 @@ public abstract class Chessman {
     private COLOR color;
     private ChessmanType type;
 
-    private int moves = 0;
+    private int moveCounter = 0;
 
     public Chessman(ChessmanType type, Position position, COLOR color) {
         this.position = position;
@@ -24,7 +24,7 @@ public abstract class Chessman {
 
     public abstract List<Position> getMoves(Board b);
 
-    public List<Position> getChessMoves(Board b, List<Chessman> chessmanList){
+    public List<Position> getCheckMoves(Board b, List<Chessman> checkChessmanList){
         List<Position> positions = getMoves(b);
 
         List<Position> ret = new ArrayList<>();
@@ -39,12 +39,12 @@ public abstract class Chessman {
                 fake.getChessmanByPosition(this.position).setPosition(position1);
 
 
-                if (fake.inChess().size() == 0) {
+                if (fake.inCheck().size() == 0) {
                     ret.add(position1);
                 }
             }
         }else{
-            for (Chessman chessman : chessmanList) {
+            for (Chessman chessman : checkChessmanList) {
                 for (Position pos : positions) {
                     if (chessman.getMoves(b).contains(pos) || chessman.getPosition().equals(pos)) {
                         Board fake = new Board(b);
@@ -53,7 +53,7 @@ public abstract class Chessman {
                         fake.getChessmanByPosition(this.position).setPosition(pos);
 
 
-                        if (fake.inChess().size() == 0) {
+                        if (fake.inCheck().size() == 0) {
                             ret.add(pos);
                         }
                     }
@@ -64,12 +64,12 @@ public abstract class Chessman {
         return ret;
     }
 
-    public int getMoves() {
-        return moves;
+    public int getMoveCounter() {
+        return moveCounter;
     }
 
-    public void setMoves(int moves) {
-        this.moves = moves;
+    public void setMoveCounter(int moveCounter) {
+        this.moveCounter = moveCounter;
     }
 
     public ChessmanType getType() {
