@@ -1,5 +1,7 @@
 # Java Chess Server
 
+[![Maven Package](https://github.com/Xandor98/Java-Chess/actions/workflows/publish.yml/badge.svg)](https://github.com/Xandor98/Java-Chess/actions/workflows/publish.yml)
+
 - [Java Chess Server](#java-chess-server)
   - [1. What is this Project about](#1-what-is-this-project-about)
   - [2. How do I start the Server](#2-how-do-i-start-the-server)
