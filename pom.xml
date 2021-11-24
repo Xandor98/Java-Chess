@@ -4,15 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>Chess</groupId>
+    <groupId>de.xandor98.chess</groupId>
     <artifactId>Java-Chess-Server</artifactId>
-    <version>0.8</version>
+    <version>1.0.1</version>
+    <packaging>jar</packaging>
+
+    <name>Chess Server</name>
+    <url>https://www.xandor98.de</url>
 
     <distributionManagement>
         <repository>
             <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Xandor98/Java-Chess</url>
+            <name>GitHub Xandor98 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/xandor98/maven-packages/</url>
         </repository>
     </distributionManagement>
 
@@ -118,11 +122,6 @@
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.8.1</version>
-                <configuration>
-                    <altReleaseDeploymentRepository>
-                        internal.repo::default::file://${project.build.directory}/mvn-repo
-                    </altReleaseDeploymentRepository>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.cxf</groupId>

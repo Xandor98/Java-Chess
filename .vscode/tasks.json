@@ -26,6 +26,12 @@
             "type": "shell",
             "command": "mvn -B clean install",
             "group": "build"
+        },
+        {
+            "label": "mvn: build",
+            "type": "shell",
+            "command": "mvn -B package",
+            "group": "build"
         }
     ]
 }

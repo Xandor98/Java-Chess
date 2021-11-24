@@ -1,11 +1,14 @@
-package Chess.Game;
+package chess.game;
 
-import Chess.Exceptions.WrongNotationException;
-import Chess.Game.pieces.Chessman;
-import Chess.generated.COLOR;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import de.xandor98.chess.exceptions.WrongNotationException;
+import de.xandor98.chess.game.Board;
+import de.xandor98.chess.game.Position;
+import de.xandor98.chess.game.pieces.Chessman;
+import de.xandor98.chess.generated.COLOR;
 
 import java.util.List;
 
