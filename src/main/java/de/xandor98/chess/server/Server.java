@@ -1,6 +1,5 @@
 package de.xandor98.chess.server;
 
-import javax.lang.model.type.ErrorType;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.xml.bind.JAXBException;
 

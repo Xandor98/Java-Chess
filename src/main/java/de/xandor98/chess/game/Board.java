@@ -8,7 +8,6 @@ import de.xandor98.chess.game.pieces.Chessman;
 import de.xandor98.chess.game.pieces.King;
 import de.xandor98.chess.game.pieces.Pawn;
 import de.xandor98.chess.generated.COLOR;
-import de.xandor98.chess.generated.ChessMessage;
 import de.xandor98.chess.generated.MoveMessage;
 import de.xandor98.chess.generated.WishMessage;
 import de.xandor98.chess.misc.Logger;

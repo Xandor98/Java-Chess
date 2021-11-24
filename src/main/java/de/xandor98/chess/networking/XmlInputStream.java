@@ -30,7 +30,6 @@ public class XmlInputStream extends UTFInputStream {
                 InputStream resourceAsStream = getClass().getResourceAsStream("/xsd/chessMessage.xsd");
                 // Der Inputstream resourceAsStream wird in die Datei temp.xsd
                 // geschrieben und dann dem Schema uebergeben
-                // XXX: Kein bessere Implementierung gefunden
                 File tempFile = File.createTempFile("temp", ".xsd");
                 FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
                 int read;
