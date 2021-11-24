@@ -16,7 +16,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Xandor98 Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/xandor98/maven-packages/</url>
+            <url>https://maven.pkg.github.com/xandor98/java-chess/</url>
         </repository>
     </distributionManagement>
 
